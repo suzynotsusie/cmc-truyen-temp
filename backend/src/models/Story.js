@@ -95,6 +95,7 @@ async function getAllStories(page = 1, limit = 10, sortBy = 'newest', includeUnp
         s.updated_at,
         s.is_published,
         COUNT(*) OVER() AS total_count,      -- Window function: tổng số record không bị ảnh hưởng bởi LIMIT/OFFSET
+        get_follower_count(s.id) AS follower_count,
         u.username AS author_username,
         u.full_name AS author_full_name
         ${selectClause}
