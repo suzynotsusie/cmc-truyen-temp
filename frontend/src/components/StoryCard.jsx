@@ -11,7 +11,7 @@ function StoryCard({ story, compact = false, horizontal = false }) {
   story.follow_count,
   "follower_count:",
   story.follower_count
-);
+  );
   const renderTags = () => {
     const tagData = story.tags;
 
@@ -102,11 +102,9 @@ function StoryCard({ story, compact = false, horizontal = false }) {
         </p>
 
         <p className="story-meta mb-2">
-          <p className="story-meta mb-2">
-  FC={String(story.follow_count)}
-  {' | '}
-  FRC={String(story.follower_count)}
-</p>
+          FC={String(story.follow_count)}
+          {' | '}
+          FRC={String(story.follower_count)}
         </p>
         
         {renderTags()}
