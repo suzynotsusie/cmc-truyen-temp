@@ -4,14 +4,6 @@ const FALLBACK_COVER =
   'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=800&q=80';
 
 function StoryCard({ story, compact = false, horizontal = false }) {
-  console.log(
-  "CARD:",
-  story.title,
-  "follow_count:",
-  story.follow_count,
-  "follower_count:",
-  story.follower_count
-  );
   const renderTags = () => {
     const tagData = story.tags;
 
@@ -102,9 +94,7 @@ function StoryCard({ story, compact = false, horizontal = false }) {
         </p>
 
         <p className="story-meta mb-2">
-          FC={String(story.follow_count)}
-          {' | '}
-          FRC={String(story.follower_count)}
+          📖 {story.chapter_count || story.total_chapters || 0} chương · 👥 {story.follow_count || 0} theo dõi
         </p>
         
         {renderTags()}
