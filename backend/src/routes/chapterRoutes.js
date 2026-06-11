@@ -4,6 +4,6 @@ const readingHistoryController = require('../controllers/readingHistoryControlle
 
 const router = express.Router();
 
-router.get('/:mangaSlug/chuong-:chapterNumber', chapterController.getChapterByNumber);
+router.get('/:id/summary', readingHistoryController.getChapterSummary);
 
 module.exports = router;

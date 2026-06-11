@@ -52,7 +52,13 @@ app.use(
       const localhostPattern = /^http:\/\/localhost(:\d+)?$/;
       if (localhostPattern.test(origin)) return callback(null, true);
       // Allow the configured frontend URL in production
+
       if (origin === env.FRONTEND_URL) return callback(null, true);
+    
+      // 3. Cho phép tất cả các nhánh preview/developer của cmc-truyen trên Vercel
+      const vercelPreviewPattern = /^https:\/\/cmc-truyen.*\.vercel\.app$/;
+      if (vercelPreviewPattern.test(origin)) return callback(null, true);
+      
       return callback(new Error(`CORS: Origin ${origin} not allowed`));
     },
     credentials: true,

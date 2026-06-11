@@ -75,6 +75,7 @@ Hệ thống chia làm 4 nhóm quyền chính:
 | Vai Trò | Quyền Hạn |
 |---------|-----------|
 | **Admin** | Toàn quyền kiểm soát hệ thống — quản lý người dùng, truyện, chương và bình luận. |
+| **Manager** | Duyệt truyện khi có truyện mới được upload |
 | **Uploader** | Đăng truyện mới, quản lý & cập nhật nội dung truyện/chương do mình đăng, cộng với tất cả quyền của User. |
 | **User** | Đọc truyện, theo dõi truyện, lưu lịch sử, viết bình luận, nhận gợi ý truyện cá nhân hóa từ AI. |
 | **Guest** | Xem danh sách truyện công khai, tìm kiếm và đọc chương (không lưu lịch sử, không bình luận). |

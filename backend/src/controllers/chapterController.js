@@ -274,35 +274,10 @@ async function deleteChapter(req, res) {
   }
 }
 
-async function getChapterByNumber(req, res, next) {
-  try {
-    const { mangaSlug, chapterNumber } = req.params;
-
-    // 1. Tìm story để lấy story_id từ slug
-    const story = await Story.findOne({ where: { slug: mangaSlug } });
-    if (!story) return res.status(404).json({ message: "Không tìm thấy truyện" });
-
-    // 2. Tìm chapter bằng story_id và chapter_number (có sẵn trong DB)
-    const chapter = await Chapter.findOne({
-      where: { 
-        story_id: story.id,
-        chapter_number: parseInt(chapterNumber) // Ép kiểu số
-      }
-    });
-
-    if (!chapter) return res.status(404).json({ message: "Không tìm thấy chương" });
-
-    res.json(chapter);
-  } catch (error) {
-    next(error);
-  }
-};
-
 module.exports = {
   getChapters,
   getChapterById,
   createChapter,
   updateChapter,
   deleteChapter,
-  getChapterByNumber,
 };
