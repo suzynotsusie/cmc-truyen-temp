@@ -153,7 +153,7 @@ async function getStoryById(id) {
           s.updated_at,
           s.is_published,
           COUNT(c.id)::int AS chapter_count,   -- Đếm thực tế số chương, cast sang int
-          get_follower_count(s.id) AS follower_count,
+          get_follower_count(s.id) AS follow_count,
           u.id AS author_user_id,
           u.username AS author_username,
           u.full_name AS author_full_name,
@@ -406,11 +406,13 @@ async function getStoriesByAuthor(authorId, page = 1, limit = 20) {
       SELECT
         s.*,
         COUNT(*) OVER() AS total_count,
+        (SELECT COUNT(*) FROM chapters c WHERE c.story_id = s.id)::int AS chapter_count,
+        get_follower_count(s.id) AS follow_count,
         u.username AS author_username,
         u.full_name AS author_full_name
       FROM stories s
       LEFT JOIN users u ON u.id = s.author_id
-      WHERE s.author_id = $1   -- Chỉ lấy truyện của tác giả này
+      WHERE s.author_id = $1
       ORDER BY s.updated_at DESC
       LIMIT $2 OFFSET $3
     `,
