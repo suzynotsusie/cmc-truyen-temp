@@ -147,6 +147,7 @@ const API = {
     create: (storyId, data) => request(`/stories/${storyId}/chapters`, { method: 'POST', data }),
     update: (storyId, chapterId, data) => request(`/stories/${storyId}/chapters/${chapterId}`, { method: 'PUT', data }),
     delete: (storyId, chapterId) => request(`/stories/${storyId}/chapters/${chapterId}`, { method: 'DELETE' }),
+    report: (storyId, chapterId, data) => request(`/stories/${storyId}/chapters/${chapterId}/report`, { method: 'POST', data }),
   },
 
   // ── Bình luận ────────────────────────────────────────────────────────────

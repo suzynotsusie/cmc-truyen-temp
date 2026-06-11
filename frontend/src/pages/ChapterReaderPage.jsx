@@ -28,6 +28,18 @@ function ChapterReaderPage() {
   const [lineSpacing, setLineSpacing] = useState(1.6);
   const [fontFamily, setFontFamily] = useState('Inter, sans-serif');
   const [autoBookmark, setAutoBookmark] = useState(true);
+  const REPORT_REASONS = [
+    { value: 'inappropriate', label: 'Nội dung không phù hợp' },
+    { value: 'copyright', label: 'Xâm phạm bản quyền' },
+    { value: 'spam', label: 'Spam / quảng cáo' },
+    { value: 'broken', label: 'Chương bị lỗi / thiếu nội dung' },
+    { value: 'other', label: 'Khác' },
+  ];
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [reportReason, setReportReason] = useState(REPORT_REASONS[0].value);
+  const [reportNote, setReportNote] = useState('');
+  const [reportError, setReportError] = useState('');
+  const [reportStatus, setReportStatus] = useState('');
   
   const readTimeRef = useRef(0);
   const scrollRef = useRef(0);
@@ -86,6 +98,53 @@ function ChapterReaderPage() {
       .then((res) => setStoryProgress(res.progress || null))
       .catch(() => setStoryProgress(null));
   }, [isAuthenticated, storyId]);
+
+  const openReportModal = () => {
+    setIsReportModalOpen(true);
+    setReportReason(REPORT_REASONS[0].value);
+    setReportNote('');
+    setReportError('');
+    setReportStatus('');
+  };
+
+  const closeReportModal = () => {
+    setIsReportModalOpen(false);
+    setReportReason(REPORT_REASONS[0].value);
+    setReportNote('');
+    setReportError('');
+    setReportStatus('');
+  };
+
+  const handleReportSubmit = async (event) => {
+    event.preventDefault();
+    if (reportStatus) {
+      closeReportModal();
+      return;
+    }
+
+    setReportError('');
+
+    if (!isAuthenticated) {
+      setReportError('Vui lòng đăng nhập để gửi báo cáo chương.');
+      return;
+    }
+
+    if (!reportReason) {
+      setReportError('Vui lòng chọn lý do báo cáo.');
+      return;
+    }
+
+    try {
+      await API.chapters.report(storyId, chapter.id, {
+        reason: reportReason,
+        note: reportNote.trim(),
+        chapter_number: chapter.chapter_number,
+      });
+      setReportStatus('Báo cáo đã được gửi. Cảm ơn bạn đã góp ý.');
+    } catch (error) {
+      setReportError('Không thể gửi báo cáo. Vui lòng thử lại sau.');
+    }
+  };
 
   const saveProgress = useCallback(async () => {
     if (!isAuthenticated || !chapter) return;
@@ -232,7 +291,14 @@ function ChapterReaderPage() {
           <h5 className="mb-0 text-truncate" style={{ fontSize: '1rem', fontWeight: 'bold' }}>{chapter.story_title || 'CMC Truyện'}</h5>
           <span className="small text-muted text-truncate d-block">Chương {chapter.chapter_number}: {chapter.title}</span>
         </div>
-        <div style={{ flex: 1, textAlign: 'right' }}>
+        <div style={{ flex: 1, textAlign: 'right' }} className="d-flex justify-content-end gap-2">
+          <button
+            type="button"
+            className="btn-cmc btn-cmc-outline btn-sm"
+            onClick={openReportModal}
+          >
+            Báo cáo
+          </button>
           <button
             type="button"
             className="btn-cmc btn-cmc-outline btn-sm"
@@ -303,6 +369,56 @@ function ChapterReaderPage() {
           mode="chapter"
         />
       </div>
+
+      {isReportModalOpen ? (
+        <div className="modal-overlay" role="dialog" aria-modal="true" onClick={closeReportModal}>
+          <div className="modal-content" onClick={(event) => event.stopPropagation()}>
+            <button type="button" className="close-modal" onClick={closeReportModal} aria-label="Đóng">&times;</button>
+            <h2>Báo cáo chương</h2>
+            <p className="text-muted mb-3">Chương {chapter.chapter_number}: {chapter.title}</p>
+            <form onSubmit={handleReportSubmit}>
+              <div className="form-group-cmc">
+                <label htmlFor="reportReason" className="d-block mb-2">Lý do báo cáo</label>
+                <select
+                  id="reportReason"
+                  className="form-select"
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                >
+                  {REPORT_REASONS.map((reason) => (
+                    <option key={reason.value} value={reason.value}>{reason.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group-cmc">
+                <label htmlFor="reportNote" className="d-block mb-2">Ghi chú chi tiết</label>
+                <textarea
+                  id="reportNote"
+                  className="form-control"
+                  rows="4"
+                  value={reportNote}
+                  onChange={(e) => setReportNote(e.target.value)}
+                  placeholder="Mô tả thêm chi tiết về vấn đề..."
+                  disabled={Boolean(reportStatus)}
+                />
+              </div>
+
+              {reportError ? <div className="alert-cmc alert-cmc-warning">{reportError}</div> : null}
+              {reportStatus ? <div className="alert-cmc">{reportStatus}</div> : null}
+
+              <div className="d-flex justify-content-end gap-2 mt-3">
+                <button type="button" className="btn-cmc btn-cmc-outline" onClick={closeReportModal}>
+                  Hủy
+                </button>
+                <button type="submit" className="btn-cmc btn-cmc-primary">
+                  {reportStatus ? 'Đóng' : 'Gửi báo cáo'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }

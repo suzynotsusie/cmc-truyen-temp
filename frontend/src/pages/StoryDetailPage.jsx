@@ -25,7 +25,21 @@ function StoryDetailPage() {
   const [error, setError] = useState('');
   const [chapterPage, setChapterPage] = useState(1);
   const [chapterPagination, setChapterPagination] = useState({ page: 1, totalPages: 1, totalItems: 0 });
-  const [sortOrder, setSortOrder] = useState('asc');
+  const [sortOrder, setSortOrder] = useState('asc');    
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportChapter, setReportChapter] = useState(null);
+  const [reportReason, setReportReason] = useState('Nội dung không phù hợp');
+  const [reportNote, setReportNote] = useState('');
+  const [reportSubmitting, setReportSubmitting] = useState(false);
+  const [reportMessage, setReportMessage] = useState('');
+
+  const REPORT_REASONS = [
+    'Nội dung không phù hợp',
+    'Sao chép/trùng lặp',
+    'Ngôn ngữ tục tĩu',
+    'Lỗi kỹ thuật/chuyển chương',
+    'Khác',
+  ];
 
   // Load story info once
   useEffect(() => {
@@ -72,6 +86,43 @@ function StoryDetailPage() {
       .then((res) => setStoryProgress(res.progress || null))
       .catch(() => setStoryProgress(null));
   }, [isAuthenticated, id]);
+
+  const openReportModal = (chapter) => {
+    setReportChapter(chapter);
+    setReportReason(REPORT_REASONS[0]);
+    setReportNote('');
+    setReportMessage('');
+    setReportModalOpen(true);
+  };
+
+  const closeReportModal = () => {
+    if (reportSubmitting) return;
+    setReportModalOpen(false);
+  };
+
+  const handleReportSubmit = async (event) => {
+    event.preventDefault();
+    if (!reportChapter) return;
+
+    setReportSubmitting(true);
+    setReportMessage('');
+
+    try {
+      await API.chapters.report(id, reportChapter.id, {
+        reason: reportReason,
+        note: reportNote.trim(),
+        chapter_number: reportChapter.chapter_number,
+      });
+      setReportMessage('Báo cáo đã được gửi. Cảm ơn bạn.');
+      setReportSubmitting(false);
+      setTimeout(() => {
+        setReportModalOpen(false);
+      }, 1200);
+    } catch (error) {
+      setReportMessage('Không gửi được báo cáo. Vui lòng thử lại.');
+      setReportSubmitting(false);
+    }
+  };
 
   if (loading) {
     return <main className="cmc-main"><p className="loading-text">Đang tải...</p></main>;
@@ -174,12 +225,21 @@ function StoryDetailPage() {
                 <ul className="chapter-list">
                   {chapters.map((chapter) => (
                     <li key={chapter.id}>
-                      <Link to={`/story/${story.id}/chapter/${chapter.id}`}>
-                        <span>
-                          Ch.{chapter.chapter_number}: {chapter.title}
-                        </span>
-                        <span className="text-muted small">Đọc →</span>
-                      </Link>
+                      <div className="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                        <Link to={`/story/${story.id}/chapter/${chapter.id}`} className="d-flex align-items-center justify-content-between w-100 gap-3">
+                          <span>
+                            Ch.{chapter.chapter_number}: {chapter.title}
+                          </span>
+                          <span className="text-muted small">Đọc →</span>
+                        </Link>
+                        <button
+                          type="button"
+                          className="btn-cmc btn-cmc-outline btn-sm"
+                          onClick={() => openReportModal(chapter)}
+                        >
+                          Báo cáo
+                        </button>
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -226,6 +286,61 @@ function StoryDetailPage() {
           <CommentSection key={`story-comments-${id}`} storyId={id} mode="story" />
         </div>
       </div>
+
+      {reportModalOpen ? (
+        <div className="modal-overlay" role="dialog" aria-modal="true" onClick={(e) => e.target === e.currentTarget && closeReportModal()}>
+          <div className="modal-content modal-content-md">
+            <button type="button" className="close-modal" onClick={closeReportModal} aria-label="Đóng">&times;</button>
+            <h2>Báo cáo chương</h2>
+            <p className="text-muted mb-3">
+              {reportChapter ? `Ch.${reportChapter.chapter_number}: ${reportChapter.title}` : 'Chương không xác định'}
+            </p>
+
+            <form onSubmit={handleReportSubmit}>
+              <div className="form-group-cmc">
+                <label htmlFor="reportReason">Lý do báo cáo</label>
+                <select
+                  id="reportReason"
+                  className="form-select"
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  required
+                >
+                  {REPORT_REASONS.map((reason) => (
+                    <option key={reason} value={reason}>{reason}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group-cmc">
+                <label htmlFor="reportNote">Ghi chú chi tiết</label>
+                <textarea
+                  id="reportNote"
+                  className="form-select"
+                  rows="5"
+                  value={reportNote}
+                  onChange={(e) => setReportNote(e.target.value)}
+                  placeholder="Mô tả chi tiết vấn đề hoặc vị trí chương..."
+                  style={{ minHeight: '130px', resize: 'vertical' }}
+                />
+              </div>
+
+              {reportMessage ? (
+                <div className="alert-cmc alert-cmc-warning mb-3">{reportMessage}</div>
+              ) : null}
+
+              <div className="d-flex justify-content-end gap-2 flex-wrap">
+                <button type="button" className="btn-cmc btn-cmc-outline" onClick={closeReportModal} disabled={reportSubmitting}>
+                  Hủy
+                </button>
+                <button type="submit" className="btn-cmc btn-cmc-primary" disabled={reportSubmitting}>
+                  {reportSubmitting ? 'Đang gửi...' : 'Gửi báo cáo'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }
