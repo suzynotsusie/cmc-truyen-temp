@@ -1182,52 +1182,25 @@ kbd {
 
 .admin-sidebar {
   width: 260px;
-  background: #111827;
-  color: white;
-  padding: 24px;
-}
-
-.admin-logo {
-  margin-bottom: 32px;
-}
-
-.admin-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.admin-menu-item {
-  color: white;
-  text-decoration: none;
-  padding: 12px 16px;
-  border-radius: 10px;
-  transition: 0.2s;
-}
-
-.admin-menu-item:hover {
-  background: rgba(255,255,255,0.1);
-}
-
-.admin-content {
-  flex: 1;
-  padding: 32px;
-  background: #f5f7fb;
-}
-.admin-layout {
-  display: flex;
-  min-height: 100vh;
-}
-
-.admin-sidebar {
-  width: 260px;
   background: #1e293b;
   color: white;
   padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  min-height: 100vh;
 }
 
 .admin-logo {
   margin-bottom: 2rem;
+}
+
+.admin-menu-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .admin-menu {
@@ -1236,14 +1209,37 @@ kbd {
   gap: 0.5rem;
 }
 
+.admin-menu-top {
+  position: sticky;
+  top: 1.5rem;
+  z-index: 1;
+}
+
+.admin-menu-bottom {
+  margin-top: auto;
+  position: sticky;
+  bottom: 1.5rem;
+  z-index: 1;
+}
+
 .admin-menu-item {
   color: white;
   text-decoration: none;
   padding: 0.75rem 1rem;
   border-radius: 8px;
+  transition: 0.2s;
 }
 
-.admin-menu-item:hover {
+.admin-logout-button {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.admin-menu-item:hover,
+.admin-logout-button:hover {
   background: rgba(255,255,255,0.1);
 }
 
