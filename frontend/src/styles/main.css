@@ -52,9 +52,18 @@ body {
   margin: 0;
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   background-color: var(--bg);
+  background-image: none;
   color: var(--text);
   line-height: 1.6;
   transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+body.has-custom-background {
+  background-image: var(--custom-background-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 a {
@@ -139,6 +148,7 @@ a {
   padding: 0.35rem 0.75rem;
   font-size: 0.9rem;
   cursor: pointer;
+  min-width: 48px;
 }
 
 .btn-theme-toggle:hover {
@@ -1252,6 +1262,10 @@ kbd {
   padding: 2rem;
   background: #f8fafc;
 }
+
+body.has-custom-background .admin-content {
+  background: transparent;
+}
 /* =========================
    ADMIN LAYOUT
 ========================= */
@@ -1306,4 +1320,8 @@ kbd {
   padding: 24px;
   background: #f8fafc;
   overflow-x: auto;
+}
+
+body.has-custom-background .admin-content {
+  background: transparent;
 }

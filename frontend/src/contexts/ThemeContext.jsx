@@ -10,6 +10,13 @@ function ThemeProvider({ children }) {
       return false;
     }
   });
+  const [backgroundImage, setBackgroundImage] = useState(() => {
+    try {
+      return localStorage.getItem('cmc_background_image') || '';
+    } catch {
+      return '';
+    }
+  });
 
   // Registry of callbacks that run whenever dark mode changes.
   // Used so that ReadingPreferencesPanel can sync the new value to the backend
@@ -32,14 +39,38 @@ function ThemeProvider({ children }) {
     darkModeListenersRef.current.forEach((fn) => fn(isDarkMode));
   }, [isDarkMode]);
 
+  useEffect(() => {
+    if (backgroundImage) {
+      document.documentElement.style.setProperty('--custom-background-image', `url(${backgroundImage})`);
+      document.body.classList.add('has-custom-background');
+      try {
+        localStorage.setItem('cmc_background_image', backgroundImage);
+      } catch {
+        // Large images can exceed localStorage quota; keep the current-page preview.
+      }
+      return;
+    }
+
+    document.documentElement.style.removeProperty('--custom-background-image');
+    document.body.classList.remove('has-custom-background');
+    try {
+      localStorage.removeItem('cmc_background_image');
+    } catch {
+      // Ignore storage errors so theme rendering remains usable.
+    }
+  }, [backgroundImage]);
+
   const value = useMemo(
     () => ({
       isDarkMode,
       setIsDarkMode,
       toggleDarkMode: () => setIsDarkMode((v) => !v),
+      backgroundImage,
+      setBackgroundImage,
+      clearBackgroundImage: () => setBackgroundImage(''),
       registerDarkModeListener,
     }),
-    [isDarkMode, registerDarkModeListener]
+    [isDarkMode, backgroundImage, registerDarkModeListener]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

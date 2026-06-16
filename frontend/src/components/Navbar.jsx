@@ -5,17 +5,164 @@ import AuthModal from './AuthModal';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 
+const BACKGROUND_MAX_WIDTH = 1920;
+const BACKGROUND_MAX_HEIGHT = 1440;
+const BACKGROUND_MIN_WIDTH = 1280;
+const BACKGROUND_QUALITY = 0.86;
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+function loadImageFromFile(file) {
+  return new Promise((resolve, reject) => {
+    const imageUrl = URL.createObjectURL(file);
+    const image = new Image();
+
+    image.onload = () => {
+      URL.revokeObjectURL(imageUrl);
+      resolve(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(imageUrl);
+      reject(new Error('Unable to load image'));
+    };
+    image.src = imageUrl;
+  });
+}
+
+function getCoverRect(sourceWidth, sourceHeight, targetWidth, targetHeight) {
+  const scale = Math.max(targetWidth / sourceWidth, targetHeight / sourceHeight);
+  const width = sourceWidth * scale;
+  const height = sourceHeight * scale;
+
+  return {
+    x: (targetWidth - width) / 2,
+    y: (targetHeight - height) / 2,
+    width,
+    height,
+  };
+}
+
+function getContainRect(sourceWidth, sourceHeight, targetWidth, targetHeight) {
+  const scale = Math.min(targetWidth / sourceWidth, targetHeight / sourceHeight);
+  const width = sourceWidth * scale;
+  const height = sourceHeight * scale;
+
+  return {
+    x: (targetWidth - width) / 2,
+    y: (targetHeight - height) / 2,
+    width,
+    height,
+  };
+}
+
+async function resizeBackgroundImage(file) {
+  const image = await loadImageFromFile(file);
+  const viewportRatio = window.innerWidth && window.innerHeight
+    ? window.innerWidth / window.innerHeight
+    : 16 / 9;
+  const deviceAdjustedWidth = Math.round((window.innerWidth || BACKGROUND_MIN_WIDTH) * (window.devicePixelRatio || 1));
+  let targetWidth = Math.min(BACKGROUND_MAX_WIDTH, Math.max(BACKGROUND_MIN_WIDTH, deviceAdjustedWidth));
+  let targetHeight = Math.round(targetWidth / viewportRatio);
+
+  if (targetHeight > BACKGROUND_MAX_HEIGHT) {
+    targetHeight = BACKGROUND_MAX_HEIGHT;
+    targetWidth = Math.round(targetHeight * viewportRatio);
+  }
+
+  const canvas = document.createElement('canvas');
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
+
+  const context = canvas.getContext('2d');
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = 'high';
+
+  const coverRect = getCoverRect(image.naturalWidth, image.naturalHeight, targetWidth, targetHeight);
+  context.filter = 'blur(28px) brightness(0.72) saturate(1.12)';
+  context.drawImage(image, coverRect.x, coverRect.y, coverRect.width, coverRect.height);
+  context.filter = 'none';
+  context.fillStyle = 'rgba(15, 23, 42, 0.22)';
+  context.fillRect(0, 0, targetWidth, targetHeight);
+
+  const containPadding = Math.round(Math.min(targetWidth, targetHeight) * 0.05);
+  const containRect = getContainRect(
+    image.naturalWidth,
+    image.naturalHeight,
+    targetWidth - containPadding * 2,
+    targetHeight - containPadding * 2
+  );
+  const imageX = containRect.x + containPadding;
+  const imageY = containRect.y + containPadding;
+
+  context.shadowColor = 'rgba(0, 0, 0, 0.28)';
+  context.shadowBlur = Math.round(Math.min(targetWidth, targetHeight) * 0.035);
+  context.shadowOffsetY = Math.round(Math.min(targetWidth, targetHeight) * 0.012);
+  context.drawImage(
+    image,
+    imageX,
+    imageY,
+    containRect.width,
+    containRect.height
+  );
+  context.shadowColor = 'transparent';
+
+  const blob = await new Promise((resolve) => {
+    canvas.toBlob(resolve, 'image/jpeg', BACKGROUND_QUALITY);
+  });
+
+  if (!blob) {
+    throw new Error('Unable to resize image');
+  }
+
+  return blobToDataUrl(blob);
+}
+
 function Navbar() {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
-  const { isDarkMode, toggleDarkMode } = useTheme();
+  const { isDarkMode, toggleDarkMode, setBackgroundImage } = useTheme();
   const [authOpen, setAuthOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const backgroundInputRef = useRef(null);
 
   const handleLogout = async () => {
     await logout();
     navigate('/');
+  };
+
+  const handleChooseBackground = () => {
+    backgroundInputRef.current?.click();
+  };
+
+  const handleBackgroundChange = async (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      alert('Vui lòng chọn một file ảnh.');
+      event.target.value = '';
+      return;
+    }
+
+    try {
+      const resizedImage = await resizeBackgroundImage(file);
+      setBackgroundImage(resizedImage);
+      event.target.value = '';
+    } catch {
+      alert('Không thể đọc ảnh đã chọn. Vui lòng thử lại.');
+      event.target.value = '';
+    }
   };
 
   useEffect(() => {
@@ -66,6 +213,22 @@ function Navbar() {
           </nav>
 
           <div className="cmc-nav-actions" style={{ position: 'relative' }}>
+            <input
+              ref={backgroundInputRef}
+              type="file"
+              accept="image/*"
+              className="visually-hidden"
+              onChange={handleBackgroundChange}
+            />
+            <button
+              type="button"
+              className="btn-theme-toggle"
+              onClick={handleChooseBackground}
+              title="Đổi ảnh nền"
+              aria-label="Đổi ảnh nền"
+            >
+              🖼️
+            </button>
             <button
               type="button"
               className="btn-theme-toggle"
