@@ -7,6 +7,8 @@ function CommentSection({ storyId, chapterId = null, mode = 'story' }) {
   const { isAuthenticated, user } = useAuth();
   const [comments, setComments] = useState([]);
   const [content, setContent] = useState('');
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -62,8 +64,11 @@ function CommentSection({ storyId, chapterId = null, mode = 'story' }) {
         story_id: numericStoryId,
         chapter_id: isChapterMode ? numericChapterId : null,
         content: content.trim(),
+        rating: rating || null,
       });
       setContent('');
+      setRating(0);
+      setHoverRating(0);
       await loadComments();
     } catch (err) {
       setError(err?.response?.data?.message || 'Không gửi được bình luận.');
@@ -103,12 +108,21 @@ function CommentSection({ storyId, chapterId = null, mode = 'story' }) {
       <div className="comment-list">
         {comments.map((comment) => (
           <div key={comment.id} className="comment-item">
-            <div className="d-flex justify-content-between gap-2 mb-1">
-              <strong>{comment.full_name || comment.username || 'Độc giả'}</strong>
-              <span className="text-muted small">
-                {new Date(comment.created_at).toLocaleString('vi-VN')}
-              </span>
-            </div>
+                  <div className="d-flex justify-content-between gap-2 mb-1">
+                    <strong>{comment.full_name || comment.username || 'Độc giả'}</strong>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      {comment.rating ? (
+                        <div className="star-display" aria-hidden>
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <span key={i} className={i < Math.round(comment.rating) ? 'star filled' : 'star'}>★</span>
+                          ))}
+                        </div>
+                      ) : null}
+                      <span className="text-muted small">
+                        {new Date(comment.created_at).toLocaleString('vi-VN')}
+                      </span>
+                    </div>
+                  </div>
             <p className="mb-1">{comment.content}</p>
             {(user?.id === comment.user_id || user?.role === 'Admin') && (
               <button type="button" className="btn-link-danger btn-sm" onClick={() => handleDelete(comment.id)}>
@@ -122,6 +136,25 @@ function CommentSection({ storyId, chapterId = null, mode = 'story' }) {
       {error ? <p className="text-danger small mt-2">{error}</p> : null}
 
       <form className="mt-3" onSubmit={handleSubmit}>
+        <div className="star-rating" aria-label="Đánh giá bằng sao">
+          {Array.from({ length: 5 }).map((_, i) => {
+            const value = i + 1;
+            const isFilled = hoverRating ? value <= hoverRating : value <= rating;
+            return (
+              <button
+                key={value}
+                type="button"
+                className={isFilled ? 'star filled' : 'star'}
+                onClick={() => setRating(value)}
+                onMouseEnter={() => setHoverRating(value)}
+                onMouseLeave={() => setHoverRating(0)}
+                aria-label={`Đánh giá ${value} sao`}
+              >
+                ★
+              </button>
+            );
+          })}
+        </div>
         <textarea
           className="form-control-cmc"
           rows={3}

@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import LegacyRedirect from './components/LegacyRedirect';
+import ChristmasSnow from './components/ChristmasSnow';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import RoleProtectedRoute from './components/RoleProtectedRoute';
@@ -41,6 +42,7 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <BrowserRouter>
+          <ChristmasSnow />
           <LegacyRedirect />
 
           <Routes>
