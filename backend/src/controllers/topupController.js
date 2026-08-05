@@ -1,3 +1,4 @@
+const db = require('../config/database');
 let PayOS;
 try {
   const payosPkg = require('@payos/node');
