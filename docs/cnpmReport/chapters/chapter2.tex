@@ -47,7 +47,7 @@ $^{***}$ User và Moderator cần đăng nhập, có đủ Tinh thạch và mở
 \end{table}
 
 Ma trận được rút ra trực tiếp từ router và middleware: tạo truyện dành cho Uploader, duyệt truyện dành cho Moderator/Admin, còn khu vực \CodePath{/api/admin} chỉ dành cho Admin.
-\clearpage
+
 \section{Luồng của khách và người dùng}
 
 \subsection{Khám phá và đọc truyện khi chưa đăng nhập}
@@ -86,7 +86,7 @@ Guest có thể duyệt, tìm kiếm, xem chi tiết và đọc nội dung công
 \end{figure}
 
 Giao diện cần phân biệt trạng thái đang tải, không có dữ liệu, không có quyền và lỗi mạng.
-\clearpage
+
 \subsection{Đăng ký, đăng nhập và duy trì phiên}
 
 Frontend gửi thông tin đăng nhập đến \CodePath{POST /api/auth/login}; backend kiểm tra mật khẩu và trả JWT. Token được lưu với key \CodePath{cmc_token}, gắn vào request bằng Axios interceptor và xác minh tại middleware backend.

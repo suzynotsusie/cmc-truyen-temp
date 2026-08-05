@@ -11,8 +11,8 @@
 % Tự động tương thích cả pdfLaTeX và XeLaTeX / LuaLaTeX trên Overleaf
 \usepackage{iftex}
 \ifPDFTeX
+  \usepackage[T5]{fontenc}
   \usepackage[utf8]{vietnam}
-  \usepackage{newtxtext,newtxmath}
 \else
   \usepackage{fontspec}
   \defaultfontfeatures{Ligatures=TeX}

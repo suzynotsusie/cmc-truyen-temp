@@ -32,6 +32,7 @@ Tiêu chí thành công & Tìm--đọc--chuyển chương nhanh, cấu hình đ�
 \end{tabularx}
 \end{table}
 
+\clearpage
 \subsection{Scenarios và hành trình chính}
 
 \begin{longtable}{|>{\centering\arraybackslash}p{1.0cm}|>{\RaggedRight\arraybackslash}p{3.1cm}|>{\RaggedRight\arraybackslash}p{8.2cm}|>{\RaggedRight\arraybackslash}p{2.2cm}|}
@@ -50,7 +51,7 @@ Tiêu chí thành công & Tìm--đọc--chuyển chương nhanh, cấu hình đ�
 \hline
 3 & Uploader tạo truyện & Mở dashboard; nhập metadata, ảnh bìa và tag; tạo truyện ở trạng thái \CodePath{pending}; bổ sung chương theo quyền được cấp. & Truyện vào hàng chờ kiểm duyệt. \\
 \hline
-4 & Moderator/Admin duyệt truyện & Mở hàng chờ; xem metadata và nội dung; chọn duyệt, yêu cầu sửa hoặc từ chối; hệ thống cập nhật trạng thái và ghi audit. & Quyết định có thể truy vết; nội dung chỉ công khai khi đạt yêu cầu. \\
+4 & Moderator / Admin duyệt truyện & Mở hàng chờ; xem metadata và nội dung; chọn duyệt, yêu cầu sửa hoặc từ chối; hệ thống cập nhật trạng thái và ghi audit. & Quyết định có thể truy vết; nội dung chỉ công khai khi đạt yêu cầu. \\
 \hline
 \end{longtable}
 
@@ -70,7 +71,7 @@ Tiêu chí thành công & Tìm--đọc--chuyển chương nhanh, cấu hình đ�
 \endhead
 PB01--02 & Xem chi tiết và đọc chương & Cao & Hoàn thành & Trang chi tiết hiển thị metadata/danh sách chương; route đọc trả đúng nội dung; điều hướng trước/sau không sai chương. \\
 \hline
-PB03--03B & Uploader tạo truyện, Moderator/Admin duyệt & Cao & Hoàn thành & Chỉ Uploader được tạo; truyện mới ở trạng thái chờ; người có quyền duyệt được ba nhánh quyết định; quyết định được ghi audit. \\
+PB03--03B & Uploader tạo truyện, Moderator / Admin duyệt & Cao & Hoàn thành & Chỉ Uploader được tạo; truyện mới ở trạng thái chờ; người có quyền duyệt được ba nhánh quyết định; quyết định được ghi audit. \\
 \hline
 PB06 & Tìm kiếm truyện & Cao & Hoàn thành & Tìm theo từ khóa và bộ lọc; kết quả đúng điều kiện; có trạng thái rỗng/lỗi và giới hạn phân trang. \\
 \hline
@@ -86,4 +87,4 @@ PB17--19 & Báo cáo, kiểm duyệt nền và xử lý vi phạm & Cao/ Trung b
 \hline
 \end{longtable}
 
-Acceptance criteria được dùng như điều kiện hoàn thành task, nhưng kết quả chỉ được coi là đạt khi có thêm bằng chứng từ test, build, thao tác giao diện hoặc audit log. Cách tách ``mô tả nhu cầu'' khỏi ``điều kiện kiểm chứng'' giúp giảm tình trạng hoàn thành code nhưng chưa hoàn thành giá trị người dùng.
+Acceptance criteria là điều kiện hoàn thành task; kết quả đạt khi có bằng chứng test/build/audit log. Việc tách mô tả nhu cầu khỏi điều kiện kiểm chứng giúp tránh tình trạng hoàn thành code nhưng chưa trao giá trị thực tế.
