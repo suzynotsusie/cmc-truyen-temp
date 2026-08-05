@@ -10,8 +10,8 @@ function AdminPayoutsPage() {
 
   const fetchRequests = async () => {
     try {
-      const res = await API.get('/payouts/admin/all');
-      setRequests(res.data.requests);
+      const res = await API.payouts.getAllAdmin();
+      setRequests(res.requests || res.data?.requests || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -24,11 +24,11 @@ function AdminPayoutsPage() {
   }, []);
 
   const handleProcess = async (id, action) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn ${action === 'approve' ? 'DUYỆT' : 'TỪ CHỐI'} yêu cầu này?`)) return;
+    if (!window.confirm(`Bạn có chắc chắn muốn ${action === 'approve' ? 'DUYỆT (Đã chuyển khoản thanh toán)' : 'TỪ CHỐI (Hoàn lại Tinh thạch)'} yêu cầu này?`)) return;
 
     setProcessingId(id);
     try {
-      await API.put(`/payouts/admin/process/${id}`, { action });
+      await API.payouts.processAdmin(id, action);
       fetchRequests();
     } catch (err) {
       alert(err.response?.data?.message || 'Có lỗi xảy ra');
@@ -73,7 +73,7 @@ function AdminPayoutsPage() {
                 <tr>
                   <th>Mã YC</th>
                   <th>Uploader</th>
-                  <th>Số TT</th>
+                  <th>Số Tinh thạch</th>
                   <th>Thực nhận (VNĐ)</th>
                   <th>Ngân hàng</th>
                   <th>Trạng thái</th>

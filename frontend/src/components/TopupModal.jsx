@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGem, faQrcode, faCheckCircle, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
 import { apiClient } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import './TopupModal.css';
 
 const PACKAGES = [
@@ -12,16 +13,19 @@ const PACKAGES = [
 ];
 
 function TopupModal({ open, onClose }) {
+  const { refreshCurrentUser } = useAuth();
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [qrData, setQrData] = useState(null);
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   useEffect(() => {
     if (!open) {
       setSelectedPackage(null);
       setQrData(null);
       setError('');
+      setSuccessMsg('');
     }
   }, [open]);
 
@@ -33,12 +37,14 @@ function TopupModal({ open, onClose }) {
     setSelectedPackage(pkg);
     setQrData(null);
     setError('');
+    setSuccessMsg('');
   };
 
   const handleGenerateQR = async () => {
     if (!selectedPackage) return;
     setLoading(true);
     setError('');
+    setSuccessMsg('');
     try {
       const returnUrl = window.location.origin + window.location.pathname;
       const { data } = await apiClient.post('/topup/create', { 
@@ -46,15 +52,24 @@ function TopupModal({ open, onClose }) {
         returnUrl: returnUrl,
         cancelUrl: returnUrl
       });
-      if (data.success && data.data.checkoutUrl) {
-        window.location.href = data.data.checkoutUrl;
+
+      if (data.success) {
+        if (data.data?.checkoutUrl) {
+          window.location.href = data.data.checkoutUrl;
+        } else if (data.data?.isSimulated) {
+          setSuccessMsg(data.message || `Nạp ${selectedPackage.crystal} Tinh thạch thành công!`);
+          if (refreshCurrentUser) refreshCurrentUser();
+          setTimeout(() => {
+            onClose();
+          }, 2000);
+        }
       } else {
         setError(data.message || 'Lỗi khi tạo mã thanh toán.');
-        setLoading(false);
       }
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại sau.');
+    } finally {
       setLoading(false);
     }
   };
@@ -81,6 +96,13 @@ function TopupModal({ open, onClose }) {
           <div className="alert-cmc alert-cmc-warning mb-3">
             <FontAwesomeIcon icon={faExclamationCircle} className="me-2" />
             {error}
+          </div>
+        )}
+
+        {successMsg && (
+          <div className="alert-cmc alert-cmc-success mb-3">
+            <FontAwesomeIcon icon={faCheckCircle} className="me-2" />
+            {successMsg}
           </div>
         )}
 

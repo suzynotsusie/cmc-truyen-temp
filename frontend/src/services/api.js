@@ -277,6 +277,12 @@ const API = {
     getReports: (status = 'ALL', page = 1) => 
       request('/reports', { method: 'GET', params: { status, page, limit: 50 } }),
   },
+  payouts: {
+    request: (data) => request('/payouts/request', { method: 'POST', data }),
+    getMyRequests: () => request('/payouts/my-requests', { method: 'GET' }),
+    getAllAdmin: () => request('/payouts/admin/all', { method: 'GET' }),
+    processAdmin: (id, action) => request(`/payouts/admin/process/${id}`, { method: 'PUT', data: { action } }),
+  },
   badWords: {
     getAll: () => request('/admin/bad-words', { method: 'GET' }),
     create: (data) => request('/admin/bad-words', { method: 'POST', data }),

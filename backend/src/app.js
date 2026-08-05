@@ -28,6 +28,7 @@ const rankingRoutes = require('./routes/rankingRoutes');
 const auditLogRoutes = require('./routes/auditLogRoutes');
 const walletRoutes = require('./routes/walletRoutes');
 const topupRoutes = require('./routes/topupRoutes');
+const payoutRoutes = require('./routes/payoutRoutes');
 
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 
@@ -89,6 +90,7 @@ app.use('/api/rankings', rankingRoutes);
 app.use('/api/audit-logs', auditLogRoutes);
 app.use('/api/wallet', walletRoutes);
 app.use('/api/topup', topupRoutes);
+app.use('/api/payouts', payoutRoutes);
 
 // Error Handling
 app.use(notFoundHandler);

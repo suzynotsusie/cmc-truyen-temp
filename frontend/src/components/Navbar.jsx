@@ -100,14 +100,24 @@ function Navbar() {
               <div className="d-flex align-items-center gap-2">
                 <span 
                   className="nav-crystal-balance" 
-                  title="Số dư Tinh thạch"
-                  onClick={() => setTopupOpen(true)}
+                  title={user?.role === 'Uploader' ? "Số dư Tinh thạch - Bấm để vào trang Rút tiền" : "Số dư Tinh thạch - Bấm để Nạp"}
+                  onClick={() => {
+                    if (user?.role === 'Uploader') {
+                      navigate('/uploader/revenue');
+                    } else {
+                      setTopupOpen(true);
+                    }
+                  }}
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      setTopupOpen(true);
+                      if (user?.role === 'Uploader') {
+                        navigate('/uploader/revenue');
+                      } else {
+                        setTopupOpen(true);
+                      }
                     }
                   }}
                 >
@@ -117,7 +127,16 @@ function Navbar() {
                 {(user?.role === 'Uploader' || user?.role === 'Admin' || Number(user?.crystal_earned || 0) > 0) ? (
                   <span 
                     className="nav-crystal-earned" 
-                    title={`Tinh thạch kiếm được: ${Number(user?.crystal_earned || 0)} Tinh thạch (~${(Number(user?.crystal_earned || 0) * 500).toLocaleString('vi-VN')}đ)`}
+                    title={`Tinh thạch kiếm được: ${Number(user?.crystal_earned || 0)} Tinh thạch (~${(Number(user?.crystal_earned || 0) * 500).toLocaleString('vi-VN')}đ) - Bấm để Rút tiền`}
+                    onClick={() => navigate('/uploader/revenue')}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        navigate('/uploader/revenue');
+                      }
+                    }}
                   >
                     <FontAwesomeIcon icon={faGem} />
                     <strong>{Number(user?.crystal_earned || 0)}</strong>
@@ -184,17 +203,28 @@ function Navbar() {
                       <span>Truyện đang theo dõi</span>
                     </Link>
 
-                    <button
-                      type="button"
-                      className="dropdown-item-cmc"
-                      onClick={() => {
-                        setDropdownOpen(false);
-                        setTopupOpen(true);
-                      }}
-                    >
-                      <FontAwesomeIcon icon={faGem} />
-                      <span>Nạp Tinh thạch</span>
-                    </button>
+                    {user?.role === 'Uploader' ? (
+                      <Link
+                        to="/uploader/revenue"
+                        className="dropdown-item-cmc"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        <FontAwesomeIcon icon={faGem} />
+                        <span>Rút Tinh thạch</span>
+                      </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        className="dropdown-item-cmc"
+                        onClick={() => {
+                          setDropdownOpen(false);
+                          setTopupOpen(true);
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faGem} />
+                        <span>Nạp Tinh thạch</span>
+                      </button>
+                    )}
 
                     <Link
                       to="/account/history"
