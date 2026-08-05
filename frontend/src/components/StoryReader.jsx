@@ -145,7 +145,7 @@ function StoryReader({
             checked={Boolean(autoUnlockNext)}
             onChange={(event) => onAutoUnlockChange?.(event.target.checked)}
           />
-          <span>Tự động mở khóa chương tiếp theo (2 Tinh thạch)</span>
+          <span>Tự động mở khóa chương tiếp theo (3 Tinh thạch)</span>
         </label>
         {chapters.length > 0 && onChapterSelect ? (
           <select
@@ -230,7 +230,7 @@ function StoryReader({
           <div className="chapter-unlock-balance-pill">
             <span>
               <FontAwesomeIcon icon={faGem} className="chapter-unlock-gem-icon" />
-              Giá: <strong>{lockedChapter?.unlock_cost || 2} Tinh thạch</strong>
+              Giá: <strong>{lockedChapter?.unlock_cost || 3} Tinh thạch</strong>
             </span>
             <span className="chapter-unlock-divider" />
             <span>Số dư của bạn: <strong>{Number(user?.crystal_balance ?? lockedChapter?.crystal_balance ?? 0)} Tinh thạch</strong></span>
@@ -255,7 +255,7 @@ function StoryReader({
               >
                 Đăng nhập để xem số dư và mở khóa
               </span>
-            ) : Number(user?.crystal_balance ?? 0) < (lockedChapter?.unlock_cost || 2) ? (
+            ) : Number(user?.crystal_balance ?? 0) < (lockedChapter?.unlock_cost || 3) ? (
               <span
                 className="chapter-unlock-secondary-link text-danger"
                 onClick={() => navigate('/user-profile')}

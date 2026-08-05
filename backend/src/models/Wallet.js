@@ -1,6 +1,6 @@
 const db = require('../config/database');
 
-const UNLOCK_COST = 2;
+const UNLOCK_COST = 3;
 
 async function getWallet(userId, page = 1, limit = 20) {
   const safePage = Math.max(Number(page) || 1, 1);
@@ -100,19 +100,45 @@ async function unlockChapter(userId, chapterId) {
       [userId, -UNLOCK_COST, newBalance, chapterId, `Mở khóa chương ${chapter.chapter_number}`]
     );
 
-    // Revenue share for Uploader
-    const authorResult = await client.query(
-      'UPDATE users SET crystal_earned = crystal_earned + $1 WHERE id = $2 RETURNING crystal_earned',
-      [UNLOCK_COST, chapter.author_id]
+    // 70/30 Revenue split: 2 crystals to Uploader (70%), 1 crystal to Admin (30%)
+    const uploaderShare = 2;
+    const adminShare = 1;
+
+    // 1. Revenue share for Uploader (70% = 2 Tinh thạch)
+    if (chapter.author_id) {
+      const authorResult = await client.query(
+        'UPDATE users SET crystal_earned = crystal_earned + $1 WHERE id = $2 RETURNING crystal_earned',
+        [uploaderShare, chapter.author_id]
+      );
+      const newEarned = authorResult.rows[0]?.crystal_earned || uploaderShare;
+
+      await client.query(
+        `INSERT INTO crystal_transactions
+           (user_id, type, amount, balance_after, chapter_id, description)
+         VALUES ($1, 'CHAPTER_REVENUE', $2, $3, $4, $5)`,
+        [chapter.author_id, uploaderShare, newEarned, chapterId, `Doanh thu từ chương ${chapter.chapter_number} của ${chapter.title} (70%)`]
+      );
+    }
+
+    // 2. Revenue share for Admin (30% = 1 Tinh thạch)
+    const adminUserResult = await client.query(
+      "SELECT id FROM users WHERE role = 'Admin' ORDER BY id ASC LIMIT 1"
     );
-    const newEarned = authorResult.rows[0]?.crystal_earned || UNLOCK_COST;
-    
-    await client.query(
-      `INSERT INTO crystal_transactions
-         (user_id, type, amount, balance_after, chapter_id, description)
-       VALUES ($1, 'CHAPTER_REVENUE', $2, $3, $4, $5)`,
-      [chapter.author_id, UNLOCK_COST, newEarned, chapterId, `Doanh thu từ chương ${chapter.chapter_number} của ${chapter.title}`]
-    );
+    if (adminUserResult.rows.length > 0) {
+      const adminId = adminUserResult.rows[0].id;
+      const adminResult = await client.query(
+        'UPDATE users SET crystal_earned = crystal_earned + $1 WHERE id = $2 RETURNING crystal_earned',
+        [adminShare, adminId]
+      );
+      const adminEarned = adminResult.rows[0]?.crystal_earned || adminShare;
+
+      await client.query(
+        `INSERT INTO crystal_transactions
+           (user_id, type, amount, balance_after, chapter_id, description)
+         VALUES ($1, 'CHAPTER_REVENUE', $2, $3, $4, $5)`,
+        [adminId, adminShare, adminEarned, chapterId, `Hoa hồng hệ thống 30% từ chương ${chapter.chapter_number}`]
+      );
+    }
 
     await client.query('COMMIT');
     return { already_unlocked: false, crystal_balance: newBalance };

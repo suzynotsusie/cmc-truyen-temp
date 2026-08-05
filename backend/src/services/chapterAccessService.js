@@ -7,11 +7,13 @@ async function getChapterAccess(user, chapter) {
   if (!user?.id) {
     return { canRead: false, isUnlocked: false, reason: 'LOGIN_REQUIRED' };
   }
+  const authorId = Number(chapter.story_author_id || chapter.author_id || 0);
+  const isAuthorOrCollaborator = (authorId > 0 && authorId === Number(user.id))
+    || await StoryCollaborator.isCollaborator(chapter.story_id, user.id);
+
   if (
     user.role === 'Admin'
-    || user.role === 'Uploader'
-    || Number(user.id) === Number(chapter.story_author_id)
-    || await StoryCollaborator.isCollaborator(chapter.story_id, user.id)
+    || isAuthorOrCollaborator
   ) {
     return { canRead: true, isUnlocked: false, reason: 'MANAGER' };
   }

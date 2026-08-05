@@ -935,7 +935,7 @@ function DashboardPage() {
                 />
                 <span>
                   <strong>Chương trả phí</strong>
-                  <small className="d-block text-muted">Giá mở khóa cố định: 2 Tinh thạch</small>
+                  <small className="d-block text-muted">Giá mở khóa cố định: 3 Tinh thạch</small>
                 </span>
               </label>
               <input

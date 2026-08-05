@@ -34,6 +34,14 @@ function UserProfile({ user, onEditClick }) {
             <span className="badge text-bg-primary" style={{ fontSize: '0.75rem', textTransform: 'uppercase', padding: '0.35em 0.65em' }}>
               {user.role}
             </span>
+            <span className="badge text-bg-warning" style={{ fontSize: '0.75rem', padding: '0.35em 0.65em' }}>
+              💎 Số dư: {Number(user.crystal_balance || 0)} Tinh thạch
+            </span>
+            {user.role === 'Uploader' || user.role === 'Admin' || Number(user.crystal_earned || 0) > 0 ? (
+              <span className="badge text-bg-success" style={{ fontSize: '0.75rem', padding: '0.35em 0.65em' }}>
+                ✨ Kiếm được: {Number(user.crystal_earned || 0)} Tinh thạch (~{(Number(user.crystal_earned || 0) * 500).toLocaleString('vi-VN')}đ)
+              </span>
+            ) : null}
             {onEditClick ? (
               <button
                 type="button"
