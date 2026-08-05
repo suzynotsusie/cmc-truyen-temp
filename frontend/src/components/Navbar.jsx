@@ -100,24 +100,14 @@ function Navbar() {
               <div className="d-flex align-items-center gap-2">
                 <span 
                   className="nav-crystal-balance" 
-                  title={user?.role === 'Uploader' ? "Số dư Tinh thạch - Bấm để vào trang Rút tiền" : "Số dư Tinh thạch - Bấm để Nạp"}
-                  onClick={() => {
-                    if (user?.role === 'Uploader') {
-                      navigate('/uploader/revenue');
-                    } else {
-                      setTopupOpen(true);
-                    }
-                  }}
+                  title="Số dư Tinh thạch - Bấm để Nạp Tinh thạch"
+                  onClick={() => setTopupOpen(true)}
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      if (user?.role === 'Uploader') {
-                        navigate('/uploader/revenue');
-                      } else {
-                        setTopupOpen(true);
-                      }
+                      setTopupOpen(true);
                     }
                   }}
                 >
