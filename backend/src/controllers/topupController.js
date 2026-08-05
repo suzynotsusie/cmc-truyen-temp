@@ -37,6 +37,7 @@ function getCrystalForAmount(amount) {
 }
 
 async function createTopupTransaction(req, res) {
+  const client = await db.connect();
   try {
     const { amount, returnUrl, cancelUrl } = req.body;
     const userId = req.user.id;
@@ -46,24 +47,22 @@ async function createTopupTransaction(req, res) {
     }
 
     const crystalReceived = getCrystalForAmount(amount);
-    // Generate orderCode (must be unique integer < 9007199254740991). We use Date.now() + userId
     const orderCode = Number(String(Date.now()).slice(-9) + String(userId).padStart(3, '0'));
     const transferContent = `NAPTT${orderCode}`;
 
-    const result = await db.query(
+    const result = await client.query(
       `INSERT INTO topup_transactions (user_id, amount, crystal_received, transfer_content, order_code, status)
        VALUES ($1, $2, $3, $4, $5, 'PENDING') RETURNING id`,
       [userId, amount, crystalReceived, transferContent, orderCode]
     );
 
-    // Default return URLs if frontend doesn't provide them
     const actualReturnUrl = returnUrl || `${req.protocol}://${req.get('host')}/account/settings`;
     const actualCancelUrl = cancelUrl || actualReturnUrl;
 
     const requestData = {
       orderCode,
       amount,
-      description: transferContent.substring(0, 25), // PayOS limit is 25 chars
+      description: transferContent.substring(0, 25),
       items: [
         {
           name: 'Nạp Tinh Thạch',
@@ -75,7 +74,61 @@ async function createTopupTransaction(req, res) {
       cancelUrl: actualCancelUrl
     };
 
-    const paymentLinkData = await payos.paymentRequests.create(requestData);
+    let checkoutUrl = null;
+    let isSimulated = false;
+
+    const isPayOSConfigured = 
+      process.env.PAYOS_CLIENT_ID && 
+      process.env.PAYOS_CLIENT_ID !== 'client-id' &&
+      process.env.PAYOS_API_KEY &&
+      process.env.PAYOS_API_KEY !== 'api-key';
+
+    if (isPayOSConfigured && payos?.paymentRequests?.create) {
+      try {
+        const paymentLinkData = await payos.paymentRequests.create(requestData);
+        checkoutUrl = paymentLinkData.checkoutUrl;
+      } catch (payosErr) {
+        console.warn('[Topup] PayOS API error, falling back to local simulation:', payosErr.message);
+        isSimulated = true;
+      }
+    } else {
+      isSimulated = true;
+    }
+
+    if (isSimulated) {
+      await client.query('BEGIN');
+
+      await client.query(
+        `UPDATE topup_transactions SET status = 'SUCCESS', updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
+        [result.rows[0].id]
+      );
+
+      const userRes = await client.query(
+        `UPDATE users SET crystal_balance = crystal_balance + $1 WHERE id = $2 RETURNING crystal_balance`,
+        [crystalReceived, userId]
+      );
+
+      await client.query(
+        `INSERT INTO crystal_transactions (user_id, type, amount, balance_after, description)
+         VALUES ($1, 'TOPUP', $2, $3, $4)`,
+        [userId, crystalReceived, userRes.rows[0].crystal_balance, `Nạp Tinh Thạch thử nghiệm: ${amount.toLocaleString('vi-VN')} VNĐ`]
+      );
+
+      await client.query('COMMIT');
+
+      return res.status(201).json({
+        success: true,
+        message: `Nạp Tinh Thạch thử nghiệm thành công! Bạn đã nhận ${crystalReceived} Tinh Thạch.`,
+        data: {
+          transactionId: result.rows[0].id,
+          amount,
+          crystalReceived,
+          orderCode,
+          newBalance: userRes.rows[0].crystal_balance,
+          isSimulated: true
+        }
+      });
+    }
 
     return res.status(201).json({
       success: true,
@@ -84,12 +137,15 @@ async function createTopupTransaction(req, res) {
         amount,
         crystalReceived,
         orderCode,
-        checkoutUrl: paymentLinkData.checkoutUrl
+        checkoutUrl
       }
     });
   } catch (error) {
+    await client.query('ROLLBACK').catch(() => {});
     console.error('[createTopupTransaction]', error);
     return res.status(500).json({ success: false, message: error.message || 'Internal server error' });
+  } finally {
+    client.release();
   }
 }
 

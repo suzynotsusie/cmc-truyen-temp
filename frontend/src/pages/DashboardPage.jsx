@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import TagInput from '../components/TagInput';
 import { slugify } from '../utils/slugify';
 import { getNextChapterNumber } from '../utils/chapterNumber';
-import { FontAwesomeIcon, faBan, faBookOpen, faMagnifyingGlass, faPenNib } from '../lib/icons';
+import { FontAwesomeIcon, faBan, faBookOpen, faGem, faMagnifyingGlass, faPenNib } from '../lib/icons';
 
 const EMPTY_STORY = {
   title: '',
@@ -499,10 +499,16 @@ function DashboardPage() {
             Xin chào, {user?.full_name || user?.username} ({user?.role})
           </p>
         </div>
-        <button type="button" className="btn-cmc btn-cmc-primary" onClick={openCreate}>
-          <FontAwesomeIcon icon={faPenNib} />
-          Thêm truyện
-        </button>
+        <div className="d-flex align-items-center gap-2">
+          <Link to="/uploader/revenue" className="btn-cmc btn-cmc-outline">
+            <FontAwesomeIcon icon={faGem} style={{ color: '#10b981' }} />
+            Rút tiền doanh thu
+          </Link>
+          <button type="button" className="btn-cmc btn-cmc-primary" onClick={openCreate}>
+            <FontAwesomeIcon icon={faPenNib} />
+            Thêm truyện
+          </button>
+        </div>
       </div>
 
       {message ? <div className="alert-cmc mb-3">{message}</div> : null}

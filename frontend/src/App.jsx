@@ -34,6 +34,8 @@ import AdminPage from './pages/AdminPage';
 import AccountSettingsPage from './pages/AccountSettingsPage';
 import FollowingStoriesPage from './pages/FollowingStoriesPage';
 import ReadingHistoryPage from './pages/ReadingHistoryPage';
+import UploaderRevenuePage from './pages/UploaderRevenuePage';
+import AdminPayoutsPage from './pages/AdminPayoutsPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 import { AuthProvider } from './contexts/AuthContext';
@@ -194,6 +196,15 @@ const router = createBrowserRouter(
                 }
               />
 
+              <Route
+                path="/uploader/revenue"
+                element={
+                  <RoleProtectedRoute allowedRoles={['Uploader', 'Admin']}>
+                    <UploaderRevenuePage />
+                  </RoleProtectedRoute>
+                }
+              />
+
               <Route path="*" element={<NotFoundPage />} />
             </Route>
 
@@ -209,6 +220,7 @@ const router = createBrowserRouter(
               <Route path="/admin/users" element={<AdminUsersPage />} />
               <Route path="/admin/stories" element={<AdminStoriesPage />} />
               <Route path="/admin/reports" element={<AdminReportsPage />} />
+              <Route path="/admin/payouts" element={<AdminPayoutsPage />} />
               <Route path="/admin/bad-words" element={<ManageBadWords />} />
               <Route path="/admin/comments" element={<ModeratorCommentsPage />} />
               <Route path="/admin/profiles" element={<ModeratorProfilesPage />} />
