@@ -89,10 +89,10 @@ function AdminPayoutsPage() {
                       <div style={{ fontSize: '0.85rem', color: 'var(--cmc-text-secondary)' }}>{req.email}</div>
                     </td>
                     <td>
-                      <FontAwesomeIcon icon={faMoneyBillWave} className="me-1" style={{color: 'var(--cmc-primary)'}}/> 
+                      <FontAwesomeIcon icon={faMoneyBillWave} className="me-1" style={{ color: '#10b981' }}/> 
                       {Number(req.crystal_amount).toLocaleString()}
                     </td>
-                    <td style={{ color: 'var(--cmc-success)', fontWeight: 'bold' }}>
+                    <td style={{ color: '#10b981', fontWeight: 'bold' }}>
                       {Number(req.vnd_amount).toLocaleString()}đ
                     </td>
                     <td>
@@ -110,27 +110,47 @@ function AdminPayoutsPage() {
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                           <button
                             type="button"
-                            className="primary-action"
-                            style={{ background: 'var(--cmc-success)', borderColor: 'var(--cmc-success)', padding: '0.25rem 0.5rem' }}
+                            style={{ 
+                              background: '#10b981', 
+                              color: '#ffffff', 
+                              border: 'none', 
+                              padding: '0.4rem 0.75rem', 
+                              borderRadius: '6px', 
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.35rem'
+                            }}
                             onClick={() => handleProcess(req.id, 'approve')}
                             disabled={processingId === req.id}
-                            title="Duyệt"
+                            title="Duyệt yêu cầu rút tiền"
                           >
                             <FontAwesomeIcon icon={faCheck} /> Duyệt
                           </button>
                           <button
                             type="button"
-                            className="danger-outline"
-                            style={{ padding: '0.25rem 0.5rem' }}
+                            style={{ 
+                              background: 'transparent', 
+                              color: '#ef4444', 
+                              border: '1px solid #ef4444', 
+                              padding: '0.4rem 0.75rem', 
+                              borderRadius: '6px', 
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.35rem'
+                            }}
                             onClick={() => handleProcess(req.id, 'reject')}
                             disabled={processingId === req.id}
-                            title="Từ chối"
+                            title="Từ chối yêu cầu"
                           >
                             <FontAwesomeIcon icon={faTimes} /> Từ chối
                           </button>
                         </div>
                       ) : (
-                        <span style={{ color: 'var(--cmc-text-tertiary)', fontSize: '0.9rem' }}>Đã xử lý</span>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Đã xử lý</span>
                       )}
                     </td>
                   </tr>
