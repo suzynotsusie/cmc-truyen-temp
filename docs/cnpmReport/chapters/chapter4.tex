@@ -60,7 +60,7 @@ Thiết kế trên tạo chuỗi kiểm soát ``commit -- test -- deploy đúng 
 
 Nhóm lưu nhật ký theo tuần trong \CodePath{docs/ai-logs}, hướng dẫn prompt trong \CodePath{PROMPTS.md}, quy tắc review tại \CodePath{AGENT\_GUIDE.md} và \CodePath{docs/technical/AI\_USAGE\_POLICY.md}. Nguyên tắc xuyên suốt là AI đóng vai trò hỗ trợ; thành viên phải đọc, kiểm tra và chịu trách nhiệm đối với output trước khi merge.
 
-\begin{longtable}{|>{\RaggedRight\arraybackslash}p{3.2cm}|>{\RaggedRight\arraybackslash}p{4.0cm}|>{\RaggedRight\arraybackslash}p{4.2cm}|>{\RaggedRight\arraybackslash}p{3.4cm}|}
+\begin{longtable}{|>{\RaggedRight\arraybackslash}p{2.1cm}|>{\RaggedRight\arraybackslash}p{3.3cm}|>{\RaggedRight\arraybackslash}p{4.0cm}|>{\RaggedRight\arraybackslash}p{5.4cm}|}
 \caption{AI gợi ý, phần nhóm kiểm chứng/sửa/loại bỏ và quyết định của nhóm}\label{tab:ai-log}\\
 \hline
 \textbf{Hoạt động AI} & \textbf{Gợi ý ban đầu} & \textbf{Nhóm kiểm chứng, sửa hoặc loại bỏ} & \textbf{Quyết định/bằng chứng} \\
@@ -70,15 +70,15 @@ Nhóm lưu nhật ký theo tuần trong \CodePath{docs/ai-logs}, hướng dẫn 
 \textbf{Hoạt động AI} & \textbf{Gợi ý ban đầu} & \textbf{Nhóm kiểm chứng, sửa hoặc loại bỏ} & \textbf{Quyết định/bằng chứng} \\
 \hline
 \endhead
-Phân tích MVP bằng RICE & Ưu tiên trình đọc sạch, tùy chỉnh UI và bookmark; đề xuất crawler và gamification ở mức thấp. & Nhóm đối chiếu thời gian/nguồn lực, giữ ba năng lực cốt lõi; loại crawler và gamification khỏi MVP. & \CodePath{week-02.md}, \CodePath{PRODUCT\_ANALYSIS.md}. \\
+Phân tích MVP bằng RICE & Ưu tiên trình đọc sạch, tùy chỉnh UI và bookmark; đề xuất crawler và gamification ở mức thấp. & Nhóm đối chiếu thời gian/nguồn lực, giữ ba năng lực cốt lõi; loại crawler và gamification khỏi MVP. & Nhật ký \CodePath{week-02.md}, \CodePath{PRODUCT_ANALYSIS.md}. \\
 \hline
-Đề xuất cấu trúc React & Chuyển mã giao diện cũ thành component, service và route React/Vite; dùng mock để dựng prototype. & Nhóm giữ redirect tương thích, kiểm tra route và tích hợp API thật theo từng bước, không giữ mock như bằng chứng production. & \CodePath{week-03.md}, \CodePath{CODEBASE\_OVERVIEW.md}. \\
+Đề xuất cấu trúc React & Chuyển mã giao diện cũ thành component, service và route React/Vite; dùng mock để dựng prototype. & Nhóm giữ redirect tương thích, kiểm tra route và tích hợp API thật theo từng bước, không giữ mock như bằng chứng production. & Nhật ký \CodePath{week-03.md}, \CodePath{CODEBASE_OVERVIEW.md}. \\
 \hline
-Soạn user story và acceptance criteria & AI chuẩn hóa câu ``Là một... tôi muốn... để...'' và checklist cho AI summary, recommendation, moderation, report. & Nhóm sửa ràng buộc theo Express/PostgreSQL hiện có và kiểm tra bằng test/source. Việc chưa tạo GitHub Issue thật được ghi nhận là thiếu sót. & \CodePath{week-04.md}, \CodePath{PROMPTS.md}. \\
+Soạn user story và acceptance criteria & AI chuẩn hóa câu ``Là một... tôi muốn... để...'' và checklist cho AI summary, recommendation, moderation, report. & Nhóm sửa ràng buộc theo Express/PostgreSQL hiện có và kiểm tra bằng test/source. & Nhật ký \CodePath{week-04.md}, \CodePath{PROMPTS.md}. \\
 \hline
-Copilot sửa test/code & Bot tạo các PR về StoryCard test và moderator test. & PR \#7, \#9, \#10 được review và merge; PR nháp \#5, \#6 không đạt bị đóng. & Lịch sử pull request và GitHub Actions. \\
+Copilot sửa test/code & Bot tạo các PR về StoryCard test và moderator test. & PR \href{https://github.com/suzynotsusie/cmc-truyen-temp/pull/7}{\#7}, \href{https://github.com/suzynotsusie/cmc-truyen-temp/pull/9}{\#9}, \href{https://github.com/suzynotsusie/cmc-truyen-temp/pull/10}{\#10} được review và merge; PR nháp \#5, \#6 không đạt bị đóng. & Lịch sử Pull Request và GitHub Actions. \\
 \hline
-Tích hợp AI sản phẩm & Gợi ý dùng Groq/Gemini cho tóm tắt và đề xuất truyện. & Nhóm thêm cache, timeout, fallback, validation ID, không đưa API key xuống frontend và không để AI tự quyết định khóa tài khoản/duyệt truyện. & \CodePath{aiService.js}, \CodePath{AI\_PERSONALIZATION.md}, \CodePath{AI\_USAGE\_POLICY.md}. \\
+Tích hợp AI sản phẩm & Gợi ý dùng Groq/Gemini cho tóm tắt và đề xuất truyện. & Nhóm thêm cache, timeout, fallback, validation ID, không đưa API key xuống frontend và không để AI tự quyết định khóa tài khoản/duyệt truyện. & Service \CodePath{aiService.js}, tài liệu \CodePath{AI_PERSONALIZATION.md}, \CodePath{AI_USAGE_POLICY.md}. \\
 \hline
 \end{longtable}
 

@@ -101,6 +101,11 @@
   {\MakeUppercase}
 \titlespacing*{\chapter}{0pt}{20pt}{15pt}
 
+% Chống dòng mồ côi (widow/orphan) ở đầu và cuối trang
+\widowpenalty=10000
+\clubpenalty=10000
+\brokenpenalty=10000
+
 \titleformat{\section}
   {\bfseries\fontsize{16pt}{19pt}\selectfont}
   {\thesection.}{0.7em}{}
@@ -187,7 +192,7 @@
 
 \newcommand{\BlankField}[1]{\textit{[#1]}}
 % nolinkurl giữ kiểu monospace nhưng cho phép ngắt dòng tại dấu /, . và -.
-\newcommand{\CodePath}[1]{\nolinkurl{#1}}
+\newcommand{\CodePath}[1]{{\urlstyle{same}\nolinkurl{#1}}}
 % Đối số 1 là một lệnh URL trong metadata.tex, ví dụ \WebsiteURL.
 \newcommand{\OptionalURL}[2]{%
   \ifdefempty{#1}{\BlankField{#2}}{\expandafter\url\expandafter{#1}}%

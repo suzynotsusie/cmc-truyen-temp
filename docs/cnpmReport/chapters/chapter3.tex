@@ -123,7 +123,7 @@ Entry point frontend là \CodePath{frontend/src/main.jsx}, sau đó render \Code
   {Chụp đoạn code thật trong \CodePath{frontend/src/App.jsx}, ưu tiên route Dashboard, Admin và Moderator.}
 
 Route frontend không thay thế quyền backend. Nếu chỉ ẩn menu Admin nhưng API không có middleware, người dùng vẫn có thể gọi endpoint bằng công cụ khác. Source hiện đã đặt RBAC ở backend; frontend guard được xem là lớp trải nghiệm và phòng lỗi điều hướng.
-\clearpage
+
 \subsection{Lớp gọi API và quản lý phiên}
 
 \CodePath{Services/api.js} tạo một Axios instance có base URL từ biến môi trường, fallback về local khi phát triển. Request interceptor tự động đính kèm JWT Bearer token vào header; response interceptor xử lý tập trung các mã lỗi xác thực (401/403), thực hiện xóa phiên làm việc và điều hướng về trang đăng nhập. Các endpoint được mô-đun hóa theo domain nghiệp vụ như auth, stories, chapters, comments, follows, reports, admin và moderator.
@@ -648,7 +648,6 @@ MT10 & Queue job notification với Redis thật & Staging với Redis thật; t
 \end{longtable}
 \endgroup
 
-\clearpage
 \section{Kết luận chương}
 
 Chương 3 đã trình bày kiến trúc SPA + REST, thiết kế giao diện theo vai trò, cách tổ chức frontend, backend, cơ sở dữ liệu, triển khai và kiểm thử. Phần đánh giá, hạn chế và hướng hoàn thiện được tổng hợp trong kết luận cuối cùng của báo cáo.
