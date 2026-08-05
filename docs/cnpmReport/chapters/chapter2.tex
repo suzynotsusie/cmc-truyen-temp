@@ -1,0 +1,510 @@
+\chapter{PHÂN TÍCH LUỒNG HOẠT ĐỘNG}
+\label{chap:flows}
+
+\section{Tổng quan tác nhân và nguyên tắc phân quyền}
+
+Hệ thống sử dụng kiểm soát truy cập theo vai trò. Backend là lớp quyết định quyền cuối cùng thông qua \CodePath{authenticateToken} và \CodePath{authorizeRole}; route guard ở frontend chủ yếu cải thiện trải nghiệm bằng cách không hiển thị màn hình mà người dùng không được phép truy cập. Không được xem frontend guard là biện pháp bảo mật duy nhất, vì người dùng vẫn có thể tự gửi HTTP request đến API.
+
+\begin{table}[htbp]
+\centering
+\caption{Ma trận quyền theo vai trò được thể hiện trong source}
+\label{tab:role-matrix}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{|>{\RaggedRight\arraybackslash}X|*{5}{>{\centering\arraybackslash}p{1.75cm}|}}
+\hline
+\textbf{Nhóm hành động} & \textbf{Guest} & \textbf{User} & \textbf{Uploader} & \textbf{Moderator} & \textbf{Admin} \\
+\hline
+Xem truyện/chương công khai & Có & Có & Có & Có & Có \\
+\hline
+Đọc chương trả phí & Không & Có$^{***}$ & Có & Có$^{***}$ & Có \\
+\hline
+Tìm kiếm, bảng xếp hạng & Có & Có & Có & Có & Có \\
+\hline
+Lưu lịch sử, theo dõi, bình luận & Không & Có & Có & Có & Có \\
+\hline
+Tạo truyện/chương & Không & Không & Có & Không & Hạn chế$^{*}$ \\
+\hline
+Quản lý truyện được phép & Không & Không & Có & Không & Có \\
+\hline
+Duyệt truyện chờ & Không & Không & Không & Có & Có \\
+\hline
+Xử lý báo cáo/bình luận & Không & Không & Không & Có & Có \\
+\hline
+Quản lý vai trò/tài khoản/từ khóa & Không & Không & Không & Không & Có \\
+\hline
+Xem audit log & Không & Không & Không & Có$^{**}$ & Có \\
+\hline
+\end{tabularx}
+
+\vspace{0.2em}
+\begin{minipage}{\textwidth}
+\footnotesize
+$^{*}$ Route tạo truyện hiện yêu cầu đúng role Uploader, trong khi một số route sửa/xóa cho phép Uploader hoặc Admin. Đây là khác biệt cần giải thích khi demo.\\
+$^{**}$ Moderator chỉ được xem phạm vi audit phù hợp theo logic backend/test, không mặc nhiên có toàn quyền như Admin.\\
+$^{***}$ User và Moderator cần đăng nhập, có đủ Tinh thạch và mở khóa chương; Uploader và Admin được backend cho phép đọc trực tiếp theo logic kiểm tra quyền hiện tại.
+\end{minipage}
+\end{table}
+
+Ma trận được rút ra trực tiếp từ router và middleware: tạo truyện dành cho Uploader, duyệt truyện dành cho Moderator/Admin, còn khu vực \CodePath{/api/admin} chỉ dành cho Admin.
+\clearpage
+\section{Luồng của khách và người dùng}
+
+\subsection{Khám phá và đọc truyện khi chưa đăng nhập}
+
+Guest có thể duyệt, tìm kiếm, xem chi tiết và đọc nội dung công khai. Route chi tiết dùng \CodePath{optionalAuth} để bổ sung dữ liệu cá nhân hóa khi request có token hợp lệ.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  flownode/.style={draw,rounded corners=4pt,minimum width=3.0cm,minimum height=1.0cm,align=center,font=\small},
+  decision/.style={draw,diamond,aspect=1.8,minimum width=3.0cm,minimum height=1.0cm,align=center,font=\small,inner sep=2pt},
+  arrow/.style={-{Latex[length=2.3mm,width=1.6mm]},thick},
+  terminal/.style={draw,ellipse,minimum width=2.2cm,minimum height=0.8cm,align=center,font=\small}
+]
+\node[flownode] (home) at (0, 2.4) {Truy cập\\trang chủ};
+\node[flownode] (find) at (4.4, 2.4) {Tìm kiếm /\\chọn xếp hạng};
+\node[flownode] (detail) at (8.8, 2.4) {Xem chi tiết\\và danh sách chương};
+
+\node[decision] (public) at (8.8, 0) {Nội dung\\được phép xem?};
+\node[flownode] (read) at (4.4, 0) {Đọc chương};
+\node[flownode] (login) at (0, 0) {Đăng nhập nếu cần\\tính năng cá nhân};
+
+\node[flownode] (deny) at (8.8, -2.2) {Thông báo không có quyền\\hoặc không tồn tại};
+\node[terminal] (end) at (8.8, -3.8) {Kết thúc};
+
+\draw[arrow] (home) -- (find);
+\draw[arrow] (find) -- (detail);
+\draw[arrow] (detail) -- (public);
+\draw[arrow] (public) -- node[above,font=\footnotesize]{Có} (read);
+\draw[arrow] (read) -- node[below,font=\scriptsize]{Nếu cần} (login);
+\draw[arrow] (public) -- node[right,font=\footnotesize]{Không} (deny);
+\draw[arrow] (deny) -- (end);
+\end{tikzpicture}
+\caption{Luồng khám phá và đọc truyện của Guest}
+\label{fig:guest-reading-flow}
+\end{figure}
+
+Giao diện cần phân biệt trạng thái đang tải, không có dữ liệu, không có quyền và lỗi mạng.
+\clearpage
+\subsection{Đăng ký, đăng nhập và duy trì phiên}
+
+Frontend gửi thông tin đăng nhập đến \CodePath{POST /api/auth/login}; backend kiểm tra mật khẩu và trả JWT. Token được lưu với key \CodePath{cmc_token}, gắn vào request bằng Axios interceptor và xác minh tại middleware backend.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  scale=0.86,
+  transform shape,
+  actor/.style={draw,rounded corners=3pt,minimum width=3.2cm,minimum height=0.8cm,align=center,font=\small\bfseries,fill=white},
+  lifeline/.style={draw=darkgray,densely dashed,thick},
+  msg/.style={-{Latex[length=2.2mm,width=1.5mm]},thick},
+  return/.style={-{Latex[length=2.2mm,width=1.5mm]},thick,dashed},
+  lbl/.style={font=\footnotesize,above,align=center,inner sep=2pt},
+  internal/.style={draw,fill=white,rounded corners=2pt,minimum width=2.8cm,minimum height=0.62cm,align=center,font=\scriptsize,inner sep=2pt},
+  phase/.style={font=\footnotesize\bfseries,anchor=west}
+]
+\node[actor] (u) at (0,0) {Người dùng};
+\node[actor] (fe) at (5.2,0) {React + Axios};
+\node[actor] (api) at (10.4,0) {Express API};
+\node[actor] (db) at (15.6,0) {PostgreSQL};
+
+\draw[lifeline] (u.south) -- (0,-14.5);
+\draw[lifeline] (fe.south) -- (5.2,-14.5);
+\draw[lifeline] (api.south) -- (10.4,-14.5);
+\draw[lifeline] (db.south) -- (15.6,-14.5);
+
+\node[phase] at (-0.3,-0.75) {A. Đăng nhập và cấp token};
+\draw[msg] (0,-1.35) -- node[lbl]{Nhập email/mật khẩu} (5.2,-1.35);
+\draw[msg] (5.2,-2.15) -- node[lbl]{POST /api/auth/login\\(không có Bearer token)} (10.4,-2.15);
+\node[internal] at (10.4,-3.0) {Validate request};
+\draw[msg] (10.4,-3.75) -- node[lbl]{Tìm user theo email} (15.6,-3.75);
+\draw[return] (15.6,-4.55) -- node[lbl]{User + password hash} (10.4,-4.55);
+\node[internal] at (10.4,-5.35)
+  {Kiểm tra is\_active\\và bcrypt.compare};
+\node[internal] at (10.4,-6.35)
+  {jwt.sign(payload, secret, expiry)};
+\draw[return] (10.4,-7.15) -- node[lbl]{200: JWT + user đã loại password} (5.2,-7.15);
+\node[internal] at (5.2,-7.95)
+  {Lưu cmc\_token và cmc\_user};
+
+\node[phase] at (-0.3,-8.65) {B. Gọi API được bảo vệ};
+\draw[msg] (5.2,-9.25) -- node[lbl]{Authorization: Bearer \{JWT\}} (10.4,-9.25);
+\node[internal] at (10.4,-10.05)
+  {authenticateToken: jwt.verify\\và gán payload vào req.user};
+\node[internal] at (10.4,-11.15)
+  {RBAC nếu route yêu cầu;\\sau đó controller xử lý};
+\draw[msg] (10.4,-12.25) -- node[lbl]{Truy vấn/cập nhật theo req.user.id} (15.6,-12.25);
+\draw[return] (15.6,-13.05) -- node[lbl]{Kết quả} (10.4,-13.05);
+\draw[return] (10.4,-13.95) -- node[lbl]{2xx; hoặc 401 token lỗi;\\403 không đủ quyền} (5.2,-13.95);
+\end{tikzpicture}
+\caption{Trình tự xác thực và sử dụng JWT}
+\label{fig:auth-sequence}
+\end{figure}
+
+Token thiếu, sai chữ ký hoặc hết hạn nhận mã 401; mã 403 được dùng khi tài khoản bị khóa hoặc người dùng đã xác thực nhưng không đủ vai trò. Response interceptor hiện xóa \CodePath{cmc_token}, \CodePath{cmc_user} và chuyển về trang đăng nhập khi nhận 401 hoặc 403, ngoại trừ mã \CodePath{CHAPTER_LOCKED}. Luồng quên mật khẩu gồm yêu cầu OTP, xác minh và đặt mật khẩu mới; việc gửi email thật cần kiểm thử tích hợp riêng.
+\clearpage
+\subsection{Theo dõi, lịch sử và tương tác}
+
+Sau khi đăng nhập, người dùng có thể theo dõi, đánh giá và bình luận. Một số thao tác dùng optimistic update và phải rollback nếu API thất bại.
+
+Khi đọc chương, hệ thống gửi tiến độ đến \CodePath{POST /api/reading-history}. Backend dùng định danh user từ JWT thay vì tin vào user id do client tự khai báo. Các endpoint lịch sử và chương đã đọc đều yêu cầu xác thực. Luồng điển hình gồm:
+
+\begin{itemize}[leftmargin=4.5em, label=--, labelsep=0.6em]
+  \item Người dùng mở trang chi tiết và chọn chương;
+  \item Frontend lấy nội dung chương theo slug và số chương;
+  \item Trình đọc hiển thị nội dung, tiến độ cuộn và tùy chọn đọc;
+  \item Sau một mốc phù hợp, frontend lưu chương/vị trí/thời gian đọc;
+  \item Lần truy cập sau, lịch sử cho phép quay lại truyện và chương gần nhất;
+  \item Nếu request lưu thất bại, giao diện không được khẳng định đã đồng bộ.
+\end{itemize}
+\subsection{Mở khóa chương trả phí bằng Tinh thạch}
+
+Với chương có trạng thái \CodePath{is_paid}, Guest chỉ nhận được thông báo khóa và phần xem trước nội dung. Người dùng đã đăng nhập có thể chọn mở khóa bằng Tinh thạch; frontend gửi request \CodePath{POST /api/chapters/<id>/unlock}. Backend kiểm tra trạng thái chương, quyền đọc và số dư trước khi thực hiện giao dịch. Khi thành công, hệ thống ghi nhận chương đã mở khóa, trừ 2 Tinh thạch khỏi ví và trả về số dư mới để giao diện cập nhật. Nếu số dư không đủ, API trả mã \CodePath{INSUFFICIENT_CRYSTALS}; nếu chương đã mở khóa trước đó, hệ thống không trừ Tinh thạch lần hai.
+Report API áp dụng rate limiter; Moderator/Admin xử lý báo cáo và lưu kết quả giải quyết.
+\clearpage
+
+\section{Luồng của Uploader}
+
+\subsection{Tạo truyện và nhập nội dung}
+
+Uploader vào Dashboard, nhập metadata hoặc import tệp. Backend nhận thông tin, tạo truyện với \CodePath{moderation_status = 'pending'} và mặc định chưa công khai. Khi import, hệ thống có bước preview để người dùng kiểm tra cách tách chương trước khi ghi dữ liệu. Source hỗ trợ tệp văn bản và EPUB; test kiểm tra thứ tự spine, tiêu đề chương, trường hợp không có tệp và fallback từ tên file.
+
+Luồng tạo nội dung được thiết kế theo nguyên tắc ``người đăng không tự duyệt nội dung của chính mình''. Test backend xác nhận Uploader không thể thêm chương trước khi truyện được Moderator duyệt và không thể dùng thao tác visibility để tự xuất bản. Điều này giảm rủi ro bỏ qua quy trình kiểm duyệt.
+
+\begin{figure}[H]
+\centering
+
+\begin{tikzpicture}[
+  state/.style={
+    draw,
+    rounded corners,
+    minimum width=3.7cm,
+    minimum height=1.0cm,
+    align=center,
+    font=\small,
+    inner sep=3pt
+  },
+  arrow/.style={
+    -{Latex[length=2.4mm]},
+    thick
+  },
+  edge label/.style={
+    fill=white,
+    inner sep=1.2pt,
+    font=\footnotesize,
+    align=center
+  }
+]
+
+% Các trạng thái
+\node[state] (pending) at (0,0)
+  {pending\\Chờ duyệt};
+
+\node[state] (approved) at (5.8,2.3)
+  {approved\\Được công khai};
+
+\node[state] (changes) at (6.2,0)
+  {changes\_requested\\Yêu cầu sửa};
+
+\node[state] (rejected) at (5.8,-2.3)
+  {rejected\\Từ chối};
+
+\node[state] (hidden) at (11.3,2.3)
+  {hidden\_by\_admin\\Bị ẩn};
+
+% Chờ duyệt -> Được công khai
+\draw[arrow]
+  (pending.north east)
+  to[bend left=12]
+  node[edge label,above,sloped,pos=0.52]{Duyệt}
+  (approved.west);
+
+% Chờ duyệt -> Yêu cầu sửa
+\draw[arrow]
+  ([yshift=1.5mm]pending.east)
+  to[bend left=10]
+  node[edge label,above,pos=0.5]{Yêu cầu sửa}
+  ([yshift=1.5mm]changes.west);
+
+% Yêu cầu sửa -> Chờ duyệt
+\draw[arrow]
+  ([yshift=-1.5mm]changes.west)
+  to[bend left=10]
+  node[edge label,below,pos=0.5]
+  {Uploader cập nhật\\và gửi lại}
+  ([yshift=-1.5mm]pending.east);
+
+% Chờ duyệt -> Từ chối
+\draw[arrow]
+  (pending.south east)
+  to[bend right=12]
+  node[edge label,below,sloped,pos=0.52]{Từ chối}
+  (rejected.west);
+
+% Được công khai -> Bị ẩn
+\draw[arrow]
+  (approved.east)
+  to[bend left=8]
+  node[edge label,above,pos=0.5]{Admin ẩn}
+  (hidden.west);
+
+\end{tikzpicture}
+
+\caption{Vòng đời kiểm duyệt của truyện}
+\label{fig:moderation-state}
+\end{figure}
+
+\subsection{Quản lý chương và cộng tác viên}
+
+Sau khi truyện được duyệt, Uploader có thể thêm, sửa, xóa hoặc import chương theo quyền sở hữu/cộng tác. Backend phải kiểm tra quan hệ với truyện, không chỉ kiểm tra role chung. Ràng buộc \CodePath{UNIQUE(story_id, chapter_number)} ngăn trùng số chương; controller chuyển xung đột dữ liệu thành phản hồi phù hợp thay vì trả lỗi máy chủ chung chung.
+
+Chức năng cộng tác viên cho phép chia sẻ quyền làm nội dung trên một truyện. Đây là luồng nhạy cảm vì việc thêm hoặc xóa cộng tác viên thay đổi quyền truy cập gián tiếp. Khi hoàn thiện sản phẩm, cần kiểm tra đầy đủ: chỉ owner/admin được quản lý cộng tác viên, không tự thêm trùng, không cấp quyền vượt quá phạm vi truyện và phải có audit nếu yêu cầu vận hành đặt ra.
+\clearpage
+\section{Luồng của Moderator}
+
+Moderator đăng nhập vào layout riêng, xem dashboard và hàng chờ truyện. Với mỗi truyện pending, người kiểm duyệt xem metadata và phần nội dung cần thiết trước khi chọn một trong ba hướng: duyệt, yêu cầu sửa kèm lý do, hoặc từ chối. Khi trạng thái thay đổi, backend cập nhật \CodePath{reviewed_by}, \CodePath{reviewed_at}, ghi audit và tạo notification phù hợp cho Uploader.
+
+Với bình luận và hồ sơ bị báo cáo, Moderator dùng bộ lọc để tìm trường hợp cần xử lý, xem ngữ cảnh và cập nhật trạng thái. Test hiện có kiểm tra việc lọc ở server, số đếm trạng thái toàn cục và một số thao tác xử lý avatar. Điểm quan trọng là người kiểm duyệt cần thấy đủ ngữ cảnh để ra quyết định, nhưng không được nhận dữ liệu nhạy cảm không liên quan.
+
+\begin{figure}[H]
+    \centering
+
+    \begin{tikzpicture}[
+        font=\small,
+        flownode/.style={
+            draw,
+            rounded corners=3pt,
+            minimum width=3.2cm,
+            minimum height=1cm,
+            align=center,
+            inner sep=5pt
+        },
+        decision/.style={
+            draw,
+            diamond,
+            aspect=2.2,
+            minimum width=3cm,
+            minimum height=1.1cm,
+            align=center,
+            inner sep=1.5pt
+        },
+        arrow/.style={
+            -{Latex[length=2.3mm,width=1.6mm]},
+            thick,
+            line cap=round,
+            line join=round
+        }
+    ]
+
+        % Tầng 1: tiếp nhận và xem xét
+        \node[flownode] (queue)  at (-2.1,4) {Mở hàng chờ};
+        \node[flownode] (review) at ( 2.1,4) {Xem metadata\\và nội dung};
+
+        % Tầng 2: quyết định
+        \node[decision,fill=lightgray] (decision) at (0,2.1)
+            {XOR\\chọn 1 nhánh};
+
+        % XOR chỉ có một đường ra; việc tỏa nhánh diễn ra tại cổng chọn bên dưới.
+        \node[
+            draw,
+            rounded corners=2pt,
+            fill=white,
+            minimum width=3.8cm,
+            minimum height=0.55cm,
+            align=center,
+            font=\scriptsize,
+            inner sep=2pt
+        ] (branch) at (0,0.65)
+            {Cổng chọn: đúng duy nhất 1 điều kiện};
+
+        % Tầng 3: ba kết quả loại trừ nhau
+        \node[flownode] (approve) at (-4.2,-1.0)
+            {Duyệt và\\công khai};
+
+        \node[flownode] (change) at (0,-1.0)
+            {Yêu cầu sửa\\kèm lý do};
+
+        \node[flownode] (reject) at (4.2,-1.0)
+            {Từ chối\\kèm lý do};
+
+        % Tầng 4: cập nhật hệ thống
+        \node[
+            flownode,
+            minimum width=10.5cm
+        ] (record) at (0,-3.4)
+            {Sau nhánh đã chọn: cập nhật DB + notification + audit};
+
+        % Luồng chính
+        \draw[arrow]
+            (queue.east) -- (review.west);
+
+        \draw[arrow]
+            (review.south)
+            to[out=-90,in=30]
+            (decision.east);
+
+        % Chỉ một đường đi ra khỏi XOR đến cổng chọn nhánh
+        \draw[arrow]
+            (decision.south) -- (branch.north);
+
+        % Từ cổng chọn mới tỏa ra ba nhánh có điều kiện loại trừ nhau
+        \draw[arrow]
+            (branch.west)
+            to[out=190,in=90]
+            node[font=\footnotesize,above,sloped,pos=0.58]{[Duyệt]}
+            (approve.north);
+
+        \draw[arrow]
+            (branch.south)
+            -- node[font=\footnotesize,right,pos=0.55]{[Yêu cầu sửa]}
+            (change.north);
+
+        \draw[arrow]
+            (branch.east)
+            to[out=-10,in=90]
+            node[font=\footnotesize,above,sloped,pos=0.58]{[Từ chối]}
+            (reject.north);
+
+        % Ba điểm nhận riêng trên cạnh trên của node cập nhật
+        \coordinate (record-left) at
+            ($(record.north west)!0.16!(record.north east)$);
+
+        \coordinate (record-center) at
+            ($(record.north west)!0.50!(record.north east)$);
+
+        \coordinate (record-right) at
+            ($(record.north west)!0.84!(record.north east)$);
+
+        % Các đường cập nhật hệ thống
+        \draw[arrow]
+            (approve.south)
+            to[out=-90,in=120]
+            (record-left);
+
+        \draw[arrow]
+            (change.south)
+            -- (record-center);
+
+        \draw[arrow]
+            (reject.south)
+            to[out=-90,in=60]
+            (record-right);
+
+    \end{tikzpicture}
+    \caption{Luồng Moderator xử lý truyện chờ duyệt}
+    \label{fig:moderator-flow}
+\end{figure}
+\clearpage
+\section{Luồng của Admin}
+
+Admin có phạm vi vận hành rộng nhất nhưng vẫn đi qua xác thực, RBAC và audit. Các nhóm công việc chính gồm:
+\begin{itemize}[leftmargin=4.5em, label=--, labelsep=0.6em]
+  \item Xem thống kê tổng quan và danh sách truyện;
+  \item Tìm kiếm user, cập nhật role hoặc trạng thái hoạt động;
+  \item Ẩn/hiện truyện, xóa bình luận theo quy định;
+  \item Quản lý danh sách từ khóa và tier kiểm duyệt;
+  \item Xem, phân loại và giải quyết báo cáo;
+  \item Truy vấn audit log để đối chiếu hành động quản trị;
+  \item Thực hiện các chức năng moderator khi cần.
+\end{itemize}
+
+\begin{table}[htbp]
+\centering
+\caption{Luồng quản trị chính và dấu vết cần lưu}
+\label{tab:admin-audit}
+\begin{tabularx}{\textwidth}{|>{\RaggedRight\arraybackslash}p{4.2cm}|X|X|}
+\hline
+\textbf{Thao tác} & \textbf{Kiểm tra trước khi thực hiện} & \textbf{Dấu vết sau thao tác} \\
+\hline
+Đổi role user & Admin hợp lệ; role đích thuộc tập cho phép; tránh tự khóa quyền quản trị cuối cùng & Actor, user bị tác động, role cũ/mới, thời điểm. \\
+\hline
+Khóa/mở tài khoản & Xác định đúng user và lý do vận hành & Actor, trạng thái cũ/mới, user bị tác động. \\
+\hline
+Ẩn/hiện truyện & Kiểm tra truyện tồn tại và quyền quản trị & Action, story id, trạng thái hiển thị. \\
+\hline
+Quản lý từ khóa & Keyword/tier hợp lệ; tránh bản ghi trùng & Tạo/sửa/xóa từ khóa và tier; không ghi dữ liệu nhạy cảm. \\
+\hline
+Xử lý báo cáo & Report còn tồn tại; action phù hợp target & Trạng thái, action, note, resolver và thời điểm. \\
+\hline
+Xóa bình luận & Xác định vi phạm và phạm vi tác động & Actor, comment id và kết quả HTTP thành công. \\
+\hline
+\end{tabularx}
+\end{table}
+
+Audit middleware chỉ ghi mutation quản trị thành công và làm sạch trường nhạy cảm trong request. Test kiểm tra password/credential lồng nhau không bị đưa vào details. Đây là yêu cầu bảo mật quan trọng: audit log phục vụ truy vết nhưng không được trở thành nơi rò rỉ bí mật.
+
+\section{Luồng báo cáo vi phạm}
+
+Luồng report kết nối người dùng, moderator và admin. Người dùng đăng nhập chọn đối tượng cần báo cáo, lý do và mô tả. Rate limiter hạn chế việc gửi lặp; controller xác thực target và tạo report. Moderator/Admin lọc theo trạng thái, xem ngữ cảnh, chọn hành động giải quyết rồi cập nhật trạng thái cùng ghi chú.
+
+Các test backend xác nhận một số quy tắc: tạo report truyện hợp lệ; gắn báo cáo avatar với tác giả bình luận liên quan; ngăn spam trong một giờ; lọc report theo trạng thái; trả 404 khi report không tồn tại; không dùng action của chapter cho report comment; và lưu dữ liệu giải quyết. Những test này chứng minh logic nhánh quan trọng, nhưng vẫn cần demo trực quan để xác nhận UI truyền đúng payload và hiển thị phản hồi dễ hiểu.
+
+\clearpage
+\section{Truy vết luồng đến endpoint và source}
+
+\begingroup
+\small
+\begin{longtable}{|>{\RaggedRight\arraybackslash}p{2.8cm}|>{\RaggedRight\arraybackslash}p{5.1cm}|>{\RaggedRight\arraybackslash}p{2.9cm}|>{\RaggedRight\arraybackslash}p{3.3cm}|}
+\caption{Truy vết luồng nghiệp vụ đến API và module hiện thực}\label{tab:flow-traceability}\\
+\hline
+\textbf{Luồng} & \textbf{Endpoint tiêu biểu} & \textbf{Quyền} & \textbf{Module chính} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Luồng} & \textbf{Endpoint tiêu biểu} & \textbf{Quyền} & \textbf{Module chính} \\
+\hline
+\endhead
+\hline
+\multicolumn{4}{|r|}{\emph{Còn tiếp ở trang sau}}\\
+\hline
+\endfoot
+\hline
+\endlastfoot
+Đăng nhập & \CodePath{POST /api/auth/login} & Public & \CodePath{authRoutes}, \CodePath{authController} \\
+\hline
+Xem truyện & \CodePath{GET /api/stories/by-slug/:slug} & Optional auth & \CodePath{storyRoutes}, \CodePath{storyController} \\
+\hline
+Đọc chương & \CodePath{GET /api/stories/by-slug/:storySlug/chapters/:chapterNumber} & Optional auth & \CodePath{chapterController} \\
+\hline
+Lưu tiến độ & \CodePath{POST /api/reading-history} & Authenticated & readingHistory controller \\
+\hline
+Theo dõi & \CodePath{POST/DELETE /api/follows/:storyId} & Authenticated & \CodePath{followRoutes}, model liên quan \\
+\hline
+Tạo truyện & \CodePath{POST /api/stories} & Uploader & \CodePath{storyController.createStory} \\
+\hline
+Import truyện & \CodePath{POST /api/stories/import-file} & Uploader & upload middleware, import service \\
+\hline
+Duyệt truyện & \CodePath{PATCH /api/moderator/pending-stories/:id/approve} & Moderator/\newline Admin & moderator controller, audit middleware \\
+\hline
+Xử lý report & \CodePath{PATCH /api/reports/:id/process} & Moderator/\newline Admin & report controller, audit middleware \\
+\hline
+Đổi role user & \CodePath{PATCH /api/admin/users/:id/role} & Admin & admin controller, audit middleware \\
+\hline
+Quản lý từ khóa & \CodePath{/api/admin/bad-words} & Admin & bad word controller/model \\
+\hline
+Xem audit & \CodePath{GET /api/audit-logs} & Admin/\newline Moderator theo phạm vi & audit log route, controller, model \\
+\hline
+\end{longtable}
+\endgroup
+\clearpage
+\section{Quy tắc xử lý lỗi và an toàn luồng}
+
+Một luồng được xem là hoàn chỉnh khi có cả đường thành công và đường lỗi. Các nguyên tắc được áp dụng hoặc cần duy trì gồm:
+
+\begin{itemize}[leftmargin=4.5em, label=--, labelsep=0.6em]
+  \item \textbf{400} cho dữ liệu đầu vào không hợp lệ, kèm thông báo đủ để người dùng sửa;
+  \item \textbf{401} khi thiếu hoặc sai phiên xác thực;
+  \item \textbf{403} khi đã xác thực nhưng không đủ quyền;
+  \item \textbf{404} khi tài nguyên không tồn tại hoặc không nên lộ sự tồn tại;
+  \item \textbf{409} cho xung đột nghiệp vụ như trùng số chương;
+  \item \textbf{429} khi vượt giới hạn request/report;
+  \item \textbf{500} chỉ cho lỗi ngoài dự kiến, không trả stack trace hoặc secret ra client;
+  \item Mutation nhiều bước cần transaction cùng một DB client để bảo đảm rollback nhất quán;
+  \item Optimistic UI phải hoàn tác khi API thất bại;
+  \item Mọi quyết định quyền phải được lặp lại ở backend dù frontend đã ẩn nút.
+\end{itemize}
+
+\section{Kết luận chương}
+
+Chương 2 đã mô tả luồng của Guest, User, Uploader, Moderator và Admin, gồm trạng thái, ngoại lệ và điểm kiểm soát quyền. Các luồng được truy vết tới endpoint để làm cơ sở cho phần triển khai.

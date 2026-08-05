@@ -1,0 +1,89 @@
+% Phần bổ sung theo tiêu chí trong file "Gợi ý nội dung báo cáo dự án".
+% Nội dung gốc của chapter1.tex được giữ nguyên.
+
+\section{Phân tích nhu cầu người dùng theo hướng sản phẩm}
+
+\subsection{Tầm nhìn sản phẩm và phạm vi MVP}
+
+Từ các vấn đề đã trình bày ở phần trước, nhóm xác định tầm nhìn sản phẩm bằng một câu: \textit{CMC Truyện là nền tảng đọc truyện trực tuyến sạch, nhanh, không có quảng cáo làm gián đoạn màn hình đọc, cho phép tùy chỉnh trải nghiệm và tự động lưu tiến độ để người dùng tiếp tục đọc thuận tiện}. Tầm nhìn này được cụ thể hóa trong \CodePath{docs/product/PRODUCT\_DIRECTION.md} và \CodePath{docs/product/PRODUCT\_ANALYSIS.md}.
+
+MVP ban đầu được giới hạn ở ba năng lực cốt lõi: trình đọc có chuyển chương rõ ràng; tùy chỉnh sáng, sepia, tối và cỡ chữ; tự động lưu, khôi phục chương đang đọc. Tiêu chí kiểm chứng là người dùng có thể vào trang, tìm truyện, đọc và chuyển chương trong dưới 30 giây; khi quay lại, hệ thống mở đúng chương dở. AI tóm tắt, gợi ý cá nhân hóa, bình luận và quản trị nâng cao là lớp mở rộng, không phải điều kiện để giá trị đọc cốt lõi tồn tại.
+
+\subsection{Personas}
+
+Hai persona đại diện được tổng hợp từ \CodePath{docs/product/REQUIREMENTS.md} và \CodePath{docs/product/PRODUCT\_ANALYSIS.md}. Đây là giả thuyết sản phẩm để định hướng thiết kế; nhóm chưa coi chúng là kết luận nghiên cứu người dùng nếu chưa có phỏng vấn hoặc số liệu sử dụng thực tế.
+
+\begin{table}[H]
+\centering
+\caption{Persona đại diện của CMC Truyện}
+\label{tab:personas}
+\begin{tabularx}{\textwidth}{|>{\RaggedRight\arraybackslash}p{2.4cm}|>{\RaggedRight\arraybackslash}X|>{\RaggedRight\arraybackslash}X|}
+\hline
+\textbf{Thuộc tính} & \textbf{Persona độc giả} & \textbf{Persona Uploader/Moderator/Admin} \\
+\hline
+Bối cảnh & Sinh viên hoặc người đi làm, đọc bằng điện thoại/laptop trong thời gian rảnh; thường theo dõi nhiều truyện. & Người đăng nội dung hoặc vận hành cộng đồng; cần xử lý truyện, chương, người dùng và báo cáo. \\
+\hline
+Mục tiêu & Tìm truyện nhanh; đọc lâu không mỏi mắt; lưu đúng tiến độ; nhận chương mới và tương tác. & Đăng và cập nhật nội dung nhanh; theo dõi trạng thái duyệt; giảm thao tác kiểm duyệt lặp lại; truy vết quyết định. \\
+\hline
+Khó khăn & Quảng cáo che nội dung, giao diện chói, mất vị trí đọc khi đổi thiết bị. & Khối lượng nội dung lớn, công cụ cũ chậm, khó rà soát bình luận/báo cáo thủ công. \\
+\hline
+Tiêu chí thành công & Tìm--đọc--chuyển chương nhanh, cấu hình đọc được lưu, quay lại đúng chương dở. & Quy trình tạo--duyệt--công khai có trạng thái rõ, phân quyền đúng và có audit log. \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{Scenarios và hành trình chính}
+
+\begin{longtable}{|>{\centering\arraybackslash}p{1.0cm}|>{\RaggedRight\arraybackslash}p{3.1cm}|>{\RaggedRight\arraybackslash}p{8.2cm}|>{\RaggedRight\arraybackslash}p{2.2cm}|}
+\caption{Các scenario nghiệp vụ đại diện}\label{tab:scenarios}\\
+\hline
+\textbf{STT} & \textbf{Tác nhân và mục tiêu} & \textbf{Luồng chính} & \textbf{Kết quả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{STT} & \textbf{Tác nhân và mục tiêu} & \textbf{Luồng chính} & \textbf{Kết quả} \\
+\hline
+\endhead
+1 & Guest/User tìm và đọc truyện & Mở trang chủ, nhập từ khóa hoặc lọc; xem chi tiết; chọn chương; hệ thống tải nội dung và điều hướng trước/sau. & Đọc đúng truyện và chương mong muốn. \\
+\hline
+2 & User theo dõi và đọc tiếp & Đăng nhập; theo dõi truyện; đọc chương; backend ghi lịch sử/tiến độ; lần truy cập sau khôi phục vị trí. & Truyện nằm trong tủ sách và không mất tiến độ. \\
+\hline
+3 & Uploader tạo truyện & Mở dashboard; nhập metadata, ảnh bìa và tag; tạo truyện ở trạng thái \CodePath{pending}; bổ sung chương theo quyền được cấp. & Truyện vào hàng chờ kiểm duyệt. \\
+\hline
+4 & Moderator/Admin duyệt truyện & Mở hàng chờ; xem metadata và nội dung; chọn duyệt, yêu cầu sửa hoặc từ chối; hệ thống cập nhật trạng thái và ghi audit. & Quyết định có thể truy vết; nội dung chỉ công khai khi đạt yêu cầu. \\
+\hline
+\end{longtable}
+
+\subsection{User stories, backlog và acceptance criteria}
+
+Đặc tả dự án có 15 user story và product backlog PB01--PB19. Bảng~\ref{tab:backlog-ac} giữ lại các mục đại diện cho MVP và các luồng xuyên vai trò; trạng thái được đối chiếu với \CodePath{docs/product/REQUIREMENTS.md} và mã nguồn hiện tại.
+
+\begin{longtable}{|>{\centering\arraybackslash}p{1.15cm}|>{\RaggedRight\arraybackslash}p{4.1cm}|>{\centering\arraybackslash}p{1.5cm}|>{\centering\arraybackslash}p{1.65cm}|>{\RaggedRight\arraybackslash}p{6.4cm}|}
+\caption{Backlog đại diện và tiêu chí nghiệm thu}\label{tab:backlog-ac}\\
+\hline
+\textbf{Mã} & \textbf{User story / tính năng} & \textbf{Ưu tiên} & \textbf{Trạng thái} & \textbf{Acceptance criteria rút gọn} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mã} & \textbf{User story / tính năng} & \textbf{Ưu tiên} & \textbf{Trạng thái} & \textbf{Acceptance criteria rút gọn} \\
+\hline
+\endhead
+PB01--02 & Xem chi tiết và đọc chương & Cao & Hoàn thành & Trang chi tiết hiển thị metadata/danh sách chương; route đọc trả đúng nội dung; điều hướng trước/sau không sai chương. \\
+\hline
+PB03--03B & Uploader tạo truyện, Moderator/Admin duyệt & Cao & Hoàn thành & Chỉ Uploader được tạo; truyện mới ở trạng thái chờ; người có quyền duyệt được ba nhánh quyết định; quyết định được ghi audit. \\
+\hline
+PB06 & Tìm kiếm truyện & Cao & Hoàn thành & Tìm theo từ khóa và bộ lọc; kết quả đúng điều kiện; có trạng thái rỗng/lỗi và giới hạn phân trang. \\
+\hline
+PB07--08 & Đăng ký và đăng nhập & Cao & Hoàn thành & Dữ liệu được validation; mật khẩu băm; đăng nhập trả JWT; route bảo vệ từ chối token sai/hết hạn. \\
+\hline
+PB09--10 & Theo dõi và lịch sử đọc & Trung bình & Hoàn thành & User có thể thêm/bỏ theo dõi; tiến độ được lưu theo tài khoản; lần sau tiếp tục đúng chương. \\
+\hline
+PB12 & Tóm tắt chương bằng AI & Trung bình & Hoàn thành & Nút tóm tắt gọi API; ưu tiên cache RAM/DB; gọi Groq rồi Gemini khi cache miss; có timeout và fallback an toàn. \\
+\hline
+PB13 & Gợi ý truyện cá nhân hóa & Trung bình & Hoàn thành & Chỉ user đăng nhập; đầu vào từ lịch sử đọc; ID do AI trả về được chuẩn hóa/kiểm tra; thiếu kết quả thì bù bằng truyện phổ biến. \\
+\hline
+PB17--19 & Báo cáo, kiểm duyệt nền và xử lý vi phạm & Cao/ Trung bình & Đang hoàn thiện & Báo cáo có trạng thái; worker dùng Redis/BullMQ xử lý nền; Admin/Moderator có thể xem, quyết định và truy vết. \\
+\hline
+\end{longtable}
+
+Acceptance criteria được dùng như điều kiện hoàn thành task, nhưng kết quả chỉ được coi là đạt khi có thêm bằng chứng từ test, build, thao tác giao diện hoặc audit log. Cách tách ``mô tả nhu cầu'' khỏi ``điều kiện kiểm chứng'' giúp giảm tình trạng hoàn thành code nhưng chưa hoàn thành giá trị người dùng.

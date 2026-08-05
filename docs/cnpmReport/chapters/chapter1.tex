@@ -1,0 +1,220 @@
+
+\chapter{GIỚI THIỆU BÀI TOÁN}
+\label{chap:introduction}
+
+\section{Bối cảnh và động cơ thực hiện}
+
+Nhu cầu đọc truyện trực tuyến ngày càng gắn với khả năng tìm kiếm nhanh, tiếp tục đúng vị trí đã đọc và sử dụng ổn định trên nhiều thiết bị. Khi số lượng truyện, chương, bình luận và báo cáo tăng, cách quản lý thủ công dễ phát sinh chậm trễ, sai sót và khó truy vết.
+
+Từ thực tế đó, nhóm xây dựng ứng dụng web \textbf{CMC Truyện}. Hệ thống hướng đến hai mục tiêu chính: tạo trải nghiệm đọc thuận tiện cho người dùng và cung cấp quy trình đăng tải, kiểm duyệt, quản trị nội dung rõ ràng cho đội ngũ vận hành.
+
+\section{Phát biểu bài toán}
+
+\subsection{Vấn đề của người đọc}
+Các vấn đề chính của người đọc gồm:
+\begin{itemize}[leftmargin=4.5em, label=--, labelsep=0.6em]
+
+  \item Khó tìm kiếm và chọn truyện khi dữ liệu tăng;
+  \item Không đồng bộ lịch sử, vị trí đọc và truyện đang theo dõi;
+  \item Thiếu tùy chỉnh hiển thị và thông báo chương mới;
+  \item Bình luận rác hoặc nội dung vi phạm làm giảm chất lượng cộng đồng.
+\end{itemize}
+
+
+\subsection{Vấn đề của người đăng nội dung và đội ngũ vận hành}
+
+Người đăng nội dung cần quản lý truyện, chương và theo dõi trạng thái kiểm duyệt. Người kiểm duyệt cần xử lý hàng chờ, báo cáo vi phạm và phản hồi cho người đăng. Quản trị viên cần quản lý tài khoản, vai trò, nội dung và nhật ký thao tác. Vì vậy, hệ thống không chỉ thực hiện các chức năng thêm, sửa, xóa mà còn phải bảo đảm xác thực, phân quyền, quy trình trạng thái và khả năng truy vết.
+\clearpage
+\section{Mục tiêu của hệ thống}
+
+\begin{table}[htbp]
+\centering
+\caption{Mục tiêu của hệ thống}
+\label{tab:system-objectives}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}p{1.2cm}|>{\RaggedRight\arraybackslash}p{5.2cm}|X|}
+\hline
+\textbf{Mã} & \textbf{Mục tiêu} & \textbf{Kết quả mong đợi} \\
+\hline
+M1 & Cung cấp trải nghiệm khám phá và đọc truyện thuận tiện & Có trang tìm kiếm, chi tiết truyện, đọc chương, bảng xếp hạng và URL định danh theo slug. \\
+\hline
+M2 & Cá nhân hóa trải nghiệm người dùng & Có lịch sử đọc, chương đã đọc, theo dõi truyện, thông báo và tùy chọn đọc. \\
+\hline
+M3 & Bảo đảm quy trình xuất bản có kiểm duyệt & Truyện mới của Uploader ở trạng thái chờ; Moderator/Admin có thể duyệt, yêu cầu sửa hoặc từ chối. \\
+\hline
+M4 & Bảo vệ thao tác theo đúng thẩm quyền & JWT xác thực phiên; middleware RBAC bảo vệ route; frontend có route guard tương ứng. \\
+\hline
+M5 & Hỗ trợ quản trị và truy vết & Có quản lý người dùng, truyện, báo cáo, từ khóa nhạy cảm và audit log. \\
+\hline
+M6 & Có khả năng kiểm chứng chất lượng kỹ thuật & Có kiểm thử backend, frontend và quy trình build production; kết quả thực chạy được trình bày ở Chương~\ref{chap:implementation}. \\
+\hline
+\end{tabularx}
+\end{table}
+
+Báo cáo mô tả hệ thống tại thời điểm hoàn thiện sản phẩm. Kết quả được ghi nhận dựa trên mã nguồn, kiểm thử, bản build và minh chứng vận hành tương ứng.
+
+\clearpage
+\section{Đối tượng sử dụng và bên liên quan}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  actor/.style={
+    draw,
+    rounded corners,
+    minimum width=2.45cm,
+    minimum height=0.85cm,
+    align=center,
+    font=\small
+  },
+  system/.style={
+    draw,
+    double,
+    very thick,
+    minimum width=5.2cm,
+    minimum height=3.4cm,
+    align=center
+  },
+  arrow/.style={-{Latex[length=2.4mm]},thick}
+]
+\node[system] (sys) {
+  \textbf{CMC Truyện}\\[0.4em]
+  Khám phá và đọc\\
+  Cá nhân hóa\\
+  Đăng nội dung\\
+  Kiểm duyệt và quản trị
+};
+\node[actor,left=1.8cm of sys,yshift=1.7cm] (guest) {Guest};
+\node[actor,left=1.8cm of sys] (user) {User};
+\node[actor,left=1.8cm of sys,yshift=-1.7cm] (uploader) {Uploader};
+\node[actor,right=1.8cm of sys,yshift=1.15cm] (moderator) {Moderator};
+\node[actor,right=1.8cm of sys,yshift=-1.15cm] (admin) {Admin};
+\draw[arrow] (guest) -- (sys);
+\draw[arrow] (user) -- (sys);
+\draw[arrow] (uploader) -- (sys);
+\draw[arrow] (moderator) -- (sys);
+\draw[arrow] (admin) -- (sys);
+\end{tikzpicture}
+\caption{Sơ đồ ngữ cảnh và các tác nhân chính}
+\label{fig:system-context}
+\end{figure}
+
+Hình~\ref{fig:system-context} khái quát năm nhóm tác nhân tương tác với hệ thống. Trong đó, Guest là người chưa đăng nhập, không phải một vai trò được lưu trong bảng \CodePath{users}.
+
+\begin{table}[H]
+\centering
+\caption{Đối tượng sử dụng và nhu cầu chính}
+\label{tab:stakeholders}
+\small
+\renewcommand{\arraystretch}{1.08}
+\begin{tabularx}{\textwidth}{|>{\bfseries\RaggedRight\arraybackslash}p{2.7cm}|X|X|}
+\hline
+\textbf{Đối tượng} & \textbf{Nhu cầu} & \textbf{Giá trị hệ thống cung cấp} \\
+\hline
+Guest & Khám phá nội dung trước khi đăng ký & Xem trang chủ, tìm kiếm, bảng xếp hạng, thông tin truyện và nội dung công khai. \\
+\hline
+User & Đọc lâu dài và tương tác & Lưu lịch sử, theo dõi, đánh giá, bình luận, nhận thông báo và tùy chỉnh trải nghiệm đọc. \\
+\hline
+Uploader & Đưa nội dung lên hệ thống & Tạo và chỉnh sửa truyện, nhập nội dung, quản lý chương và cộng tác viên theo quy trình duyệt. \\
+\hline
+Moderator & Duy trì chất lượng nội dung & Duyệt truyện chờ và xử lý báo cáo, bình luận hoặc hồ sơ theo phạm vi được giao. \\
+\hline
+Admin & Quản trị toàn hệ thống & Quản lý người dùng, vai trò, truyện, báo cáo, từ khóa, nhật ký và số liệu tổng quan. \\
+\hline
+Nhóm phát triển & Bảo trì và mở rộng sản phẩm & Duy trì kiến trúc, API, cơ sở dữ liệu, kiểm thử, tài liệu và cấu hình triển khai. \\
+\hline
+\end{tabularx}
+\end{table}
+\clearpage
+\section{Phạm vi chức năng}
+
+\subsection{Chức năng trong phạm vi}
+
+Phạm vi chức năng được xác định từ yêu cầu dự án, route frontend và router backend \cite{requirements}, gồm:
+
+\begin{itemize}[leftmargin=4.5em, label=--, labelsep=0.6em]
+  \item Xác thực và tài khoản: Đăng ký, đăng nhập, đăng xuất, Google OAuth, quên/đặt lại mật khẩu bằng OTP và cập nhật hồ sơ;
+  \item Khám phá truyện: Danh sách, tìm kiếm, lọc theo tag hoặc danh mục, bảng xếp hạng và trang chi tiết;
+  \item Trải nghiệm đọc: Đọc chương theo URL thân thiện, lưu lịch sử, lưu chương đã đọc và tùy chọn hiển thị;
+  \item Mở khóa chương trả phí: Hiển thị số dư Tinh thạch, kiểm tra quyền đọc, mở khóa chương bằng số dư nội bộ và lưu lịch sử giao dịch;
+  \item Tương tác: Theo dõi, đánh giá sao, bình luận, trả lời, bình chọn và báo cáo vi phạm;
+  \item Đăng nội dung: Tạo truyện, import tệp văn bản/EPUB, quản lý chương, tag và cộng tác viên;
+  \item Kiểm duyệt: Hàng chờ truyện, yêu cầu sửa, từ chối/duyệt, xử lý bình luận, hồ sơ và báo cáo;
+  \item Quản trị: Quản lý user, role, trạng thái tài khoản, truyện, từ khóa, báo cáo và audit log;
+  \item Tính năng hỗ trợ: Tóm tắt chương và gợi ý truyện bằng AI, notification, worker và hàng đợi tác vụ nền.
+\end{itemize}
+
+
+\subsection{Ngoài phạm vi hoặc chưa đủ minh chứng}
+
+Các nội dung ngoài phạm vi hoặc chưa đủ bằng chứng gồm:
+
+\begin{itemize}[leftmargin=4.5em, label=--, labelsep=0.6em]
+  \item Thanh toán, gói thuê bao, quảng cáo, bản quyền nội dung và chia sẻ doanh thu;
+  \item Nạp Tinh thạch hoặc thanh toán qua cổng thanh toán thật; hệ thống hiện chỉ cấp số dư demo và ghi nhận giao dịch mở khóa nội bộ.
+  \item Ứng dụng di động native hoặc chế độ đọc ngoại tuyến;
+  \item Kiểm thử tải, kiểm thử xâm nhập và chỉ số SLA trên môi trường production;
+  \item Khả năng chịu lỗi của Redis/worker và tính đúng đắn của hàng đợi khi hệ thống khởi động lại;
+  \item Liên kết website production, video demo và dashboard giám sát thực tế;
+  \item Số liệu người dùng thật, dữ liệu vận hành thật hoặc kết quả kinh doanh.
+\end{itemize}
+
+
+
+\section{Yêu cầu phi chức năng}
+
+\begin{table}[H]
+\centering
+\caption{Yêu cầu phi chức năng và giải pháp đáp ứng}
+\label{tab:nonfunctional}
+
+\begin{tabularx}{\textwidth}{
+  |>{\bfseries\RaggedRight\arraybackslash}p{3.0cm}
+  |X
+  |X|
+}
+\hline
+\textbf{Thuộc tính}
+& \textbf{Yêu cầu}
+& \textbf{Giải pháp/giới hạn hiện tại} \\
+\hline
+
+Bảo mật
+& Route riêng tư phải được xác thực và phân quyền
+& JWT, Helmet, CORS, rate limiter, RBAC và audit middleware; chưa có kết quả penetration test. \\
+\hline
+
+Hiệu năng
+& Tránh response lớn và kết nối DB lặp lại
+& PostgreSQL pool, pagination, index, API danh sách chương không trả content; bundle frontend còn cảnh báo kích thước. \\
+\hline
+
+Khả dụng
+& Giao diện phản hồi trên các trạng thái tải/lỗi
+& Skeleton, optimistic UI có rollback ở một số tương tác; chưa có số liệu uptime. \\
+\hline
+
+Dễ bảo trì
+& Tách trách nhiệm và có quy ước source
+& Frontend theo các nhóm pages, components, services, contexts; backend theo routes, controllers, models, services, middleware và workers. \\
+\hline
+
+Khả năng mở rộng
+& Tác vụ dài không chặn request chính
+& Redis/BullMQ và process worker riêng; cần kiểm thử tích hợp với hạ tầng thật. \\
+\hline
+
+Truy vết
+& Thao tác quản trị quan trọng có lịch sử
+& Audit log lưu actor, action, entity và details đã làm sạch dữ liệu nhạy cảm. \\
+\hline
+
+Tương thích
+& Hoạt động như SPA trên hosting tĩnh
+& Vercel rewrite về \CodePath{index.html}; API URL cấu hình qua biến môi trường. \\
+\hline
+\end{tabularx}
+\end{table}
+\clearpage
+
+
+

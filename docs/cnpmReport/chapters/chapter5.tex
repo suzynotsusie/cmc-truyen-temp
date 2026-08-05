@@ -1,0 +1,57 @@
+\chapter{LIÊN HỆ LÝ THUYẾT ENGINEERING SOFTWARE PRODUCTS}
+
+\section{Phương pháp đối chiếu}
+
+Chương này đối chiếu quyết định của nhóm với các khái niệm trong \textit{Engineering Software Products: An Introduction to Modern Software Engineering} của Ian Sommerville \cite{sommerville-esp}. Mỗi mục đi theo mạch: lý thuyết và chương tham chiếu; cách áp dụng có bằng chứng; phản biện về mức phù hợp hoặc lý do không áp dụng đầy đủ. Cách trình bày này tránh việc chỉ liệt kê thuật ngữ mà không gắn với quyết định thực tế.
+
+\begin{landscape}
+\vspace*{\fill}
+\begingroup
+\small
+\begin{longtable}{|>{\centering\arraybackslash}p{0.8cm}|>{\RaggedRight\arraybackslash}p{4.2cm}|>{\RaggedRight\arraybackslash}p{6.0cm}|>{\RaggedRight\arraybackslash}p{5.5cm}|>{\RaggedRight\arraybackslash}p{6.5cm}|}
+\caption{Đối chiếu quyết định của nhóm với lý thuyết Sommerville}\label{tab:sommerville-mapping}\\
+\hline
+\textbf{\#} & \textbf{Khái niệm / Chương (Sommerville)} & \textbf{Quyết định của nhóm} & \textbf{Link đến minh chứng (trên GitHub)} & \textbf{Phản biện (phù hợp / không áp dụng \& vì sao)} \\
+\hline
+\endfirsthead
+\hline
+\textbf{\#} & \textbf{Khái niệm / Chương (Sommerville)} & \textbf{Quyết định của nhóm} & \textbf{Link đến minh chứng (trên GitHub)} & \textbf{Phản biện (phù hợp / không áp dụng \& vì sao)} \\
+\hline
+\endhead
+1 & Product vision \& MVP (Ch.2) & Viết product vision 1 câu; chọn các chức năng lõi cho bản MVP (xác thực, core reader, tùy chỉnh UI, CRUD truyện/chương) & Issue \href{https://github.com/suzynotsusie/cmc-truyen-temp/issues/26}{\#26} (vision), Milestone ``Core Reading Platform'', Release \href{https://github.com/suzynotsusie/cmc-truyen-temp/releases/tag/v1.0.0}{v1.0.0} & Phù hợp: nhóm 4 người, thời gian ngắn nên cần giới hạn phạm vi để hoàn thiện trình đọc cốt lõi sớm nhất. \\
+\hline
+2 & Persona \& user story (Ch.3) & Dựng 2 persona; xây dựng 18 user story kèm acceptance criteria chuẩn hóa & Issues \href{https://github.com/suzynotsusie/cmc-truyen-temp/issues/26}{\#26}--\href{https://github.com/suzynotsusie/cmc-truyen-temp/issues/43}{\#43}, file \href{https://github.com/suzynotsusie/cmc-truyen-temp/blob/main/docs/product/REQUIREMENTS.md}{REQUIREMENTS.md} & Phù hợp: giúp bám sát nhu cầu thực tế của người đọc, uploader và moderator thay vì đặc tả cứng. \\
+\hline
+3 & Kiến trúc: monolith vs microservices (Ch.4--5) & Chọn kiến trúc Modular Monolith (Frontend React SPA tách khỏi REST API Express, DB PostgreSQL \& Redis Queue) & PR \href{https://github.com/suzynotsusie/cmc-truyen-temp/pull/12}{\#12} (API architecture), file \href{https://github.com/suzynotsusie/cmc-truyen-temp/blob/main/README.md}{README.md} & Không dùng microservices: quy mô dự án và nhóm nhỏ, chia dịch vụ sớm sẽ gây phức tạp thừa về hạ tầng và chi phí vận hành. \\
+\hline
+4 & REST API (Ch.6) & Thiết kế API theo chuẩn RESTful cho toàn bộ các module (truyện, chương, tương tác, moderation, AI) & Issues \href{https://github.com/suzynotsusie/cmc-truyen-temp/issues/26}{\#26}--\href{https://github.com/suzynotsusie/cmc-truyen-temp/issues/30}{\#30}, \href{https://github.com/suzynotsusie/cmc-truyen-temp/issues/43}{\#43}, PR \href{https://github.com/suzynotsusie/cmc-truyen-temp/pull/12}{\#12} & Phù hợp: client web SPA và worker/AI dùng chung một API thống nhất, dễ nâng cấp và kiểm thử. \\
+\hline
+5 & Kiểm thử \& lập trình tin cậy (Ch.7--8) & Viết unit test cho phần lõi, E2E test cho luồng chính và review mã nguồn qua Pull Request & Issues \href{https://github.com/suzynotsusie/cmc-truyen-temp/issues/37}{\#37}--\href{https://github.com/suzynotsusie/cmc-truyen-temp/issues/40}{\#40}, Release \href{https://github.com/suzynotsusie/cmc-truyen-temp/releases/tag/v1.2.0}{v1.2.0}, PR \href{https://github.com/suzynotsusie/cmc-truyen-temp/pull/7}{\#7}, PR \href{https://github.com/suzynotsusie/cmc-truyen-temp/pull/9}{\#9}, PR \href{https://github.com/suzynotsusie/cmc-truyen-temp/pull/10}{\#10} & Phù hợp: bảo vệ phần logic lõi và phòng ngừa lỗi tái phát; bộ test tự động CI đạt 100\% pass. \\
+\hline
+6 & DevOps / CI-CD (Ch.9--10) & Chạy test tự động khi push/PR (\CodePath{tests.yml}), tự động deploy production và đóng gói các Release phiên bản & Workflows \href{https://github.com/suzynotsusie/cmc-truyen-temp/blob/main/.github/workflows/tests.yml}{\CodePath{tests.yml}}, \href{https://github.com/suzynotsusie/cmc-truyen-temp/blob/main/.github/workflows/deploy-production.yml}{\CodePath{deploy-production.yml}}, Releases \href{https://github.com/suzynotsusie/cmc-truyen-temp/releases/tag/v1.0.0}{\textbf{v1.0.0}}, \href{https://github.com/suzynotsusie/cmc-truyen-temp/releases/tag/v1.1.0}{\textbf{v1.1.0}}, \href{https://github.com/suzynotsusie/cmc-truyen-temp/releases/tag/v1.2.0}{\textbf{v1.2.0}}, \href{https://github.com/suzynotsusie/cmc-truyen-temp/releases/tag/v2.0.0}{\textbf{v2.0.0}} & CI/CD kèm Release tagging giúp kiểm soát chất lượng và truy vết phiên bản minh bạch trước khi xuất bản. \\
+\hline
+\end{longtable}
+\endgroup
+\vspace*{\fill}
+\end{landscape}
+
+\section{Phân tích sâu các quyết định chính}
+
+\subsection{Giới hạn MVP và quản lý phạm vi}
+
+Theo tư duy sản phẩm, MVP không phải là phiên bản chứa mọi chức năng ở chất lượng thấp mà là tập năng lực nhỏ nhất đủ kiểm chứng giá trị. Ba năng lực đọc sạch, tùy chỉnh giao diện và khôi phục tiến độ tạo thành một vòng giá trị hoàn chỉnh: người dùng tìm được nội dung, đọc thuận tiện và có lý do quay lại. Việc đặt AI ở lớp mở rộng là hợp lý vì hệ thống vẫn có giá trị khi nhà cung cấp AI lỗi hoặc chưa cấu hình key.
+
+Phản biện quan trọng là trạng thái ``Completed'' trong backlog chỉ phản ánh mức hoàn thành kỹ thuật được nhóm ghi nhận, không tự động chứng minh mức chấp nhận của người dùng. Tiêu chí ``dưới 30 giây'' cần được đo qua usability test có kịch bản, thiết bị và số người tham gia cụ thể; nếu chưa có số liệu thì chỉ nên coi là mục tiêu.
+
+\subsection{Kiến trúc đủ dùng thay vì microservices sớm}
+
+Frontend/backend tách rời cho phép React và API triển khai độc lập, trong khi backend vẫn là một hệ thống có module thay vì nhiều dịch vụ mạng. Cách này giảm chi phí discovery, observability, giao dịch phân tán và đồng bộ schema. PostgreSQL phù hợp với quan hệ giữa user, story, chapter, interaction và moderation; Redis/BullMQ chỉ được dùng nơi cần queue/tác vụ nền.
+
+Nhóm không áp dụng microservices vì chưa có bằng chứng về tải hoặc ranh giới tổ chức đòi hỏi tách dịch vụ. Quyết định này phù hợp với nguyên tắc tránh độ phức tạp không tạo giá trị. Nếu số lượng worker, lưu lượng AI hoặc moderation tăng, nhóm có thể tách theo dữ liệu đo được thay vì theo xu hướng công nghệ.
+
+\subsection{AI-assisted development và trách nhiệm kỹ thuật}
+
+Công cụ AI hỗ trợ tăng tốc quá trình phân tích yêu cầu, xây dựng mã mẫu, tự động hóa tiêu chí nghiệm thu và khởi tạo các kịch bản kiểm thử. Lịch sử PR thể hiện các đề xuất mã nguồn từ Copilot luôn trải qua quy trình đánh giá (Code Review) và chạy bộ test tự động trước khi được tích hợp vào nhánh chính; các đề xuất không đạt tiêu chuẩn đều bị loại bỏ. Quy trình này đảm bảo đội ngũ phát triển kiểm soát hoàn toàn chất lượng phần mềm.
+
+Các quyết định thiết kế cốt lõi—bao gồm giới hạn phạm vi MVP, kiến trúc phân tầng, phân quyền truy cập, nguyên tắc bảo mật và điều kiện nghiệm thu—đều do nhóm phát triển trực tiếp quyết định. Đơn cử đối với các tính năng tích hợp AI trong sản phẩm, hệ thống áp dụng cơ chế cache, timeout, fallback và không cho phép AI tự động đưa ra các quyết định quản trị có tác động lớn. Cách tiếp cận này đáp ứng tốt các nguyên tắc về lập trình tin cậy và khả năng kiểm soát hệ thống \cite{sommerville-se10,pressman9}.
+

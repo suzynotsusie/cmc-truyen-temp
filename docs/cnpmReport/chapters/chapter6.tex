@@ -1,0 +1,55 @@
+\chapter{KẾT QUẢ THỰC HIỆN}
+
+\section{Sản phẩm và kịch bản MVP}
+
+Sản phẩm hiện có tại \url{https://cmc-truyen.vercel.app}; mã nguồn và lịch sử cộng tác được lưu tại \url{https://github.com/suzynotsusie/cmc-truyen-temp}. 
+
+Kịch bản MVP xuyên suốt là: người dùng mở trang chủ, tìm hoặc chọn truyện, xem chi tiết, mở chương, tùy chỉnh chế độ đọc, chuyển chương; sau khi đăng nhập, tiến độ được lưu để lần sau tiếp tục. Kịch bản mở rộng đi qua toàn bộ chuỗi sản phẩm: Uploader tạo truyện, Moderator duyệt, User đọc/tương tác, Admin xem báo cáo và audit.
+
+\begin{table}[H]
+\centering
+\caption{Đối chiếu kết quả MVP với mục tiêu sản phẩm}
+\label{tab:mvp-results}
+\begin{tabularx}{\textwidth}{|>{\RaggedRight\arraybackslash}p{3.3cm}|>{\RaggedRight\arraybackslash}X|>{\centering\arraybackslash}p{2.2cm}|}
+\hline
+\textbf{Mục tiêu} & \textbf{Kết quả và bằng chứng} & \textbf{Đánh giá} \\
+\hline
+Trình đọc sạch & Route đọc chương, điều hướng trước/sau, preview chương khóa và giao diện không chèn quảng cáo trong nội dung đọc; ảnh màn hình đọc ở Chương 3. & Đạt về chức năng \\
+\hline
+Tùy chỉnh trải nghiệm & Hỗ trợ giao diện sáng/tối và các thiết lập đọc; trạng thái UI được quản lý ở frontend. & Đạt về chức năng \\
+\hline
+Lưu và khôi phục tiến độ & API/lịch sử đọc và trang tài khoản hỗ trợ ghi nhận chương đã đọc, tiếp tục theo tài khoản. & Đạt về chức năng \\
+\hline
+Luồng nội dung & Uploader tạo/nhập truyện, quản lý chương; Moderator duyệt/yêu cầu sửa/từ chối; có trạng thái và audit. & Đạt phần chính \\
+\hline
+Quản trị và an toàn & JWT, RBAC, validation, rate limit, moderation, report, audit log và quản lý user. & Đạt phần chính \\
+\hline
+AI hỗ trợ & Tóm tắt chương và gợi ý cá nhân hóa có cache, fallback và giới hạn tin cậy. & Hoàn thành theo backlog \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{Đánh giá chức năng, cơ sở dữ liệu và kiến trúc}
+
+Về chức năng, hệ thống bao phủ năm vai trò Guest, User, Uploader, Moderator và Admin. Ma trận quyền, các nhánh lỗi và ánh xạ endpoint/source đã được trình bày ở Chương 2; giao diện, triển khai frontend/backend, database và kiểm thử được trình bày ở Chương 3. 
+
+Về dữ liệu, PostgreSQL lưu user, story, chapter, tag, lịch sử đọc, follow, rating, comment, report, audit và dữ liệu liên quan; transaction được dùng cho nghiệp vụ cần tính nhất quán như mở khóa chương. Redis/BullMQ hỗ trợ queue/worker và PostgreSQL vẫn là nguồn dữ liệu bền vững. ERD và schema chính đã được chèn trong Chương 3.
+
+Về kiến trúc, hệ thống đạt mục tiêu tách SPA khỏi REST API và tách tác vụ nền khỏi request chính. Điểm mạnh là ranh giới trách nhiệm tương đối rõ, API có middleware xác thực/phân quyền và pipeline CI kiểm tra cả backend, frontend, E2E trước deploy. Kiến trúc này phù hợp quy mô hiện tại hơn microservices, nhưng vẫn cần quan sát queue, lỗi dịch vụ ngoài và độ trễ AI khi vận hành thật.
+
+\section{Hạn chế được xác nhận}
+
+\begin{itemize}
+  \item Product backlog còn PB17--PB19 ở trạng thái đang hoàn thiện: báo cáo/analytics, auto moderation và xử lý vi phạm cần thêm kiểm chứng trên hạ tầng thật.
+  \item E2E hiện mock nhiều dependency; chưa thay thế staging test với PostgreSQL, Redis, email, storage và OAuth thật.  
+
+  \item Cần tiếp tục tối ưu bundle frontend, teardown queue, kiểm thử tải, security audit và accessibility audit.
+\end{itemize}
+
+\section{Hướng phát triển}
+
+Ưu tiên gần nhất là hoàn tất PB17--PB19 và nghiệm thu trên staging; bổ sung quan sát Redis/BullMQ, log có cấu trúc và cảnh báo; tối ưu bundle bằng lazy loading; tăng kiểm thử tích hợp, tải, bảo mật và accessibility.
+
+Về sản phẩm, nhóm chỉ mở rộng sau khi có dữ liệu: nâng chất lượng gợi ý từ lịch sử thật, thêm công cụ Moderator theo rủi ro, và cải thiện trải nghiệm đọc trên thiết bị di động. Các quyết định AI có ảnh hưởng đến nội dung hoặc tài khoản vẫn phải có human review, khả năng giải thích và cơ chế khiếu nại.
+
+

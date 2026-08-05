@@ -1,0 +1,86 @@
+\chapter{CỘNG TÁC TRÊN GITHUB VÀ SỬ DỤNG CÔNG CỤ AI}
+
+\section{Kho mã nguồn và quy ước cộng tác}
+
+Kho mã nguồn công khai được kiểm tra tại \url{https://github.com/suzynotsusie/cmc-truyen-temp}.Hình~\ref{fig:github-repository} là ảnh chụp trực tiếp trang kho mã nguồn dùng làm minh chứng.
+
+\ReportImage[0.35\textheight]
+  {images/screenshots/github-repository.png}
+  {Kho mã nguồn GitHub của dự án CMC Truyện}
+  {fig:github-repository}
+  {Ảnh chụp trang GitHub của kho mã nguồn.}
+
+Nhóm làm việc theo vòng lặp: chia nhỏ yêu cầu; tạo nhánh hoặc task; commit theo thay đổi có ý nghĩa; mở pull request khi cần review/tích hợp; chạy test tự động; chỉ đưa commit đạt yêu cầu vào nhánh chính. README là điểm vào cho người mới, trong khi \CodePath{docs/product}, \CodePath{docs/technical}, \CodePath{docs/testing} và \CodePath{docs/ai-logs} lưu bằng chứng chi tiết.
+
+\section{Issues, commits, pull requests, milestones và releases}
+
+\begin{longtable}{|>{\RaggedRight\arraybackslash}p{2.6cm}|>{\RaggedRight\arraybackslash}p{7.0cm}|>{\RaggedRight\arraybackslash}p{5.1cm}|}
+\caption{Đối chiếu các cơ chế cộng tác trên GitHub}\label{tab:github-process}\\
+\hline
+\textbf{Cơ chế} & \textbf{Cách nhóm đã sử dụng / bằng chứng} & \textbf{Đánh giá và hành động đã thực hiện} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Cơ chế} & \textbf{Cách nhóm đã sử dụng / bằng chứng} & \textbf{Đánh giá và hành động đã thực hiện} \\
+\hline
+\endhead
+README và tài liệu & README mô tả tính năng, kiến trúc, môi trường, lệnh chạy/test, route và nguyên tắc đóng góp. Product vision, persona, story và backlog nằm trong \CodePath{docs/product/REQUIREMENTS.md}. & Tài liệu đầy đủ, minh bạch và làm điểm mốc thống nhất cho cả dự án. \\
+\hline
+Commits & Lịch sử có hơn 276 commit trên trang GitHub. Ví dụ: \href{https://github.com/suzynotsusie/cmc-truyen-temp/commit/395f087}{\CodePath{395f087}} (release v1.0.0), \href{https://github.com/suzynotsusie/cmc-truyen-temp/commit/80fdb59}{\CodePath{80fdb59}} (release v1.1.0), \href{https://github.com/suzynotsusie/cmc-truyen-temp/commit/977ccb3}{\CodePath{977ccb3}} (release v1.2.0), \href{https://github.com/suzynotsusie/cmc-truyen-temp/commit/ab78216}{\CodePath{ab78216}} (release v2.0.0). & Có khả năng truy vết thay đổi minh bạch theo từng mốc phát triển. \\
+\hline
+Pull requests & 13 PR đã đóng, 0 PR mở. PR \href{https://github.com/suzynotsusie/cmc-truyen-temp/pull/12}{\#12} sửa auth/API production; PR \href{https://github.com/suzynotsusie/cmc-truyen-temp/pull/13}{\#13} tự động hóa deploy; các PR \href{https://github.com/suzynotsusie/cmc-truyen-temp/pull/7}{\#7}, \href{https://github.com/suzynotsusie/cmc-truyen-temp/pull/9}{\#9}, \href{https://github.com/suzynotsusie/cmc-truyen-temp/pull/10}{\#10} liên quan đến test và code review. & PR cung cấp điểm review và tích hợp chặt chẽ. Đóng PR không đạt đảm bảo chất lượng nhánh chính. \\
+\hline
+Issues & Hệ thống đã quản lý đầy đủ 18 GitHub Issues từ \href{https://github.com/suzynotsusie/cmc-truyen-temp/issues/26}{\#26} đến \href{https://github.com/suzynotsusie/cmc-truyen-temp/issues/43}{\#43}, gắn nhãn (labels), phân công công việc (assignees) và liên kết chặt chẽ với các Milestones và PR. & Đạt chuẩn tiêu chí quản lý task minh bạch trên GitHub. \\
+\hline
+Milestones & Nhóm xây dựng 4 Milestones chính: (1) Core Reading Platform (Issues \#26--\#30, \#32); (2) Engagement \& Search (Issues \#31, \#33--\#36); (3) Moderation \& Safety (Issues \#37--\#40); (4) AI \& Analytics (Issues \#41--\#43). & Quản lý phạm vi phát triển dự án theo đúng quy trình agile/scrum. \\
+\hline
+Releases & Đã đóng gói 4 phiên bản chính thức trên GitHub: \textbf{v1.0.0} (commit \CodePath{395f087}), \textbf{v1.1.0} (commit \CodePath{80fdb59}), \textbf{v1.2.0} (commit \CodePath{977ccb3}) và \textbf{v2.0.0} (commit \CodePath{ab78216}) với Release Notes chi tiết. & Truy vết phiên bản hệ thống hoàn chỉnh và chuyên nghiệp. \\
+\hline
+\end{longtable}
+
+Quy trình quản lý trên GitHub được nhóm thực hiện đồng bộ từ việc tạo Issues, gom nhóm vào các Milestones tương ứng, phát triển theo nhánh và kiểm thử tự động, tới việc tạo Tags và Releases đánh dấu mốc hoàn thiện sản phẩm. Dữ liệu đối chiếu hoàn toàn trùng khớp với lịch sử kho mã nguồn.
+
+\section{Code review, kiểm thử tự động và DevOps}
+
+Workflow \CodePath{.github/workflows/tests.yml} chạy khi push, pull request hoặc kích hoạt thủ công, gồm backend Jest, frontend Vitest/build và Playwright E2E. Workflow \CodePath{deploy-production.yml} chỉ deploy khi bộ test thành công trên nhánh mặc định và truyền đúng commit SHA đến máy chủ. Tại thời điểm kiểm tra, GitHub Actions hiển thị 131 workflow run; Automated Tests \#112 và Deploy production \#17 đều hoàn tất thành công cho commit mới nhất lúc đó.
+
+\ReportImage[0.35\textheight]
+  {images/screenshots/github-actions.png}
+  {GitHub Actions với các lần chạy test và deploy thành công}
+  {fig:github-actions}
+  {Ảnh chụp trang Actions của kho mã nguồn.}
+
+Thiết kế trên tạo chuỗi kiểm soát ``commit -- test -- deploy đúng SHA'', giảm nguy cơ triển khai một phiên bản khác với phiên bản đã kiểm thử. Bí mật SSH được lấy từ GitHub Secrets, known host được ghim và job deploy chỉ có quyền đọc nội dung kho. Tuy vậy, dự án vẫn cần môi trường staging có PostgreSQL/Redis/dịch vụ ngoài thật, kiểm thử tải và security audit trước khi xem quy trình là production-ready \cite{pressman9,owasp-top10}.
+
+
+
+
+
+\section{Nhật ký sử dụng công cụ và tác tử AI}
+
+Nhóm lưu nhật ký theo tuần trong \CodePath{docs/ai-logs}, hướng dẫn prompt trong \CodePath{PROMPTS.md}, quy tắc review tại \CodePath{AGENT\_GUIDE.md} và \CodePath{docs/technical/AI\_USAGE\_POLICY.md}. Nguyên tắc xuyên suốt là AI đóng vai trò hỗ trợ; thành viên phải đọc, kiểm tra và chịu trách nhiệm đối với output trước khi merge.
+
+\begin{longtable}{|>{\RaggedRight\arraybackslash}p{3.2cm}|>{\RaggedRight\arraybackslash}p{4.0cm}|>{\RaggedRight\arraybackslash}p{4.2cm}|>{\RaggedRight\arraybackslash}p{3.4cm}|}
+\caption{AI gợi ý, phần nhóm kiểm chứng/sửa/loại bỏ và quyết định của nhóm}\label{tab:ai-log}\\
+\hline
+\textbf{Hoạt động AI} & \textbf{Gợi ý ban đầu} & \textbf{Nhóm kiểm chứng, sửa hoặc loại bỏ} & \textbf{Quyết định/bằng chứng} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Hoạt động AI} & \textbf{Gợi ý ban đầu} & \textbf{Nhóm kiểm chứng, sửa hoặc loại bỏ} & \textbf{Quyết định/bằng chứng} \\
+\hline
+\endhead
+Phân tích MVP bằng RICE & Ưu tiên trình đọc sạch, tùy chỉnh UI và bookmark; đề xuất crawler và gamification ở mức thấp. & Nhóm đối chiếu thời gian/nguồn lực, giữ ba năng lực cốt lõi; loại crawler và gamification khỏi MVP. & \CodePath{week-02.md}, \CodePath{PRODUCT\_ANALYSIS.md}. \\
+\hline
+Đề xuất cấu trúc React & Chuyển mã giao diện cũ thành component, service và route React/Vite; dùng mock để dựng prototype. & Nhóm giữ redirect tương thích, kiểm tra route và tích hợp API thật theo từng bước, không giữ mock như bằng chứng production. & \CodePath{week-03.md}, \CodePath{CODEBASE\_OVERVIEW.md}. \\
+\hline
+Soạn user story và acceptance criteria & AI chuẩn hóa câu ``Là một... tôi muốn... để...'' và checklist cho AI summary, recommendation, moderation, report. & Nhóm sửa ràng buộc theo Express/PostgreSQL hiện có và kiểm tra bằng test/source. Việc chưa tạo GitHub Issue thật được ghi nhận là thiếu sót. & \CodePath{week-04.md}, \CodePath{PROMPTS.md}. \\
+\hline
+Copilot sửa test/code & Bot tạo các PR về StoryCard test và moderator test. & PR \#7, \#9, \#10 được review và merge; PR nháp \#5, \#6 không đạt bị đóng. & Lịch sử pull request và GitHub Actions. \\
+\hline
+Tích hợp AI sản phẩm & Gợi ý dùng Groq/Gemini cho tóm tắt và đề xuất truyện. & Nhóm thêm cache, timeout, fallback, validation ID, không đưa API key xuống frontend và không để AI tự quyết định khóa tài khoản/duyệt truyện. & \CodePath{aiService.js}, \CodePath{AI\_PERSONALIZATION.md}, \CodePath{AI\_USAGE\_POLICY.md}. \\
+\hline
+\end{longtable}
+
+Những quyết định nhóm tự chịu trách nhiệm gồm lựa chọn phạm vi MVP, kiến trúc frontend/backend tách rời, PostgreSQL/Redis, phân quyền, tiêu chuẩn nghiệm thu, việc merge/đóng PR và chấp nhận các hạn chế còn lại. AI không thay thế quyết định sản phẩm, review bảo mật hoặc phán quyết kiểm duyệt có tác động đến người dùng.
+

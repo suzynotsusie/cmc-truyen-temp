@@ -1,0 +1,236 @@
+% !TeX program = pdflatex
+% !TeX encoding = UTF-8
+\documentclass[14pt,a4paper,oneside]{extreport}
+
+% ================================================================
+% Báo cáo học phần PROG2008 - Phát triển ứng dụng Web
+% Compiler: pdfLaTeX, chạy ít nhất 2 lần để cập nhật mục lục.
+% ================================================================
+
+
+% Tự động tương thích cả pdfLaTeX và XeLaTeX / LuaLaTeX trên Overleaf
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[utf8]{vietnam}
+  \usepackage{newtxtext,newtxmath}
+\else
+  \usepackage{fontspec}
+  \defaultfontfeatures{Ligatures=TeX}
+  \IfFontExistsTF{Times New Roman}{
+    \setmainfont{Times New Roman}[
+      BoldFont={Times New Roman Bold},
+      ItalicFont={Times New Roman Italic},
+      BoldItalicFont={Times New Roman Bold Italic}
+    ]
+  }{
+    \IfFontExistsTF{DejaVu Serif}{
+      \setmainfont{DejaVu Serif}
+    }{
+      \setmainfont{Latin Modern Roman}
+    }
+  }
+\fi
+\usepackage{geometry}
+\geometry{a4paper,top=2.5cm,bottom=2.5cm,left=3cm,right=2cm,headsep=0.65cm,footskip=1cm}
+
+\usepackage{setspace}
+% Cỡ chữ 14 pt và giãn dòng 1.05 để cân bằng khả năng đọc với mục tiêu
+% khoảng 35--40 trang; số trang còn phụ thuộc tỷ lệ ảnh thật được chèn.
+\setstretch{1.05}
+\setlength{\parindent}{1.27cm}
+\setlength{\parskip}{0pt}
+\setlength{\emergencystretch}{2em}
+\usepackage{indentfirst}
+\usepackage{microtype}
+
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{pdflscape}
+\usepackage{pdfpages}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{ragged2e}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{caption}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,calc,fit,positioning,shapes.geometric}
+\usepackage{hyperref}
+\usepackage{etoolbox}
+\usepackage{xparse}
+\usepackage{listings}
+
+\definecolor{reportblue}{RGB}{0,102,204}
+\definecolor{lightgray}{gray}{0.94}
+\definecolor{midgray}{gray}{0.55}
+\definecolor{darkgray}{gray}{0.20}
+
+% Bảng theo mẫu báo cáo cũ: đường viền kín, nét đều, khoảng đệm thoáng.
+\setlength{\arrayrulewidth}{0.6pt}
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.25}
+
+\hypersetup{
+  unicode=true,
+  colorlinks=false,
+  hidelinks,
+  pdfborder={0 0 0},
+  pdfauthor={Nhóm sinh viên học phần PROG2008},
+  pdftitle={Báo cáo bài tập lớn học phần Phát triển ứng dụng Web}
+}
+\urlstyle{same}
+\PassOptionsToPackage{hyphens}{url}
+\makeatletter
+\g@addto@macro\UrlBreaks{%
+  \do\/\do\-\do\_\do\:\do\.\do\=\do\?\do\&\do\%\do\#\do\+\do\@%
+}
+\makeatother
+
+% ================================================================
+% Định dạng tiêu đề, mục lục và caption
+% ================================================================
+\renewcommand{\chaptername}{CHƯƠNG}
+\titleformat{\chapter}[block]
+  {\centering\bfseries\fontsize{18pt}{22pt}\selectfont}
+  {\chaptername~\thechapter.}
+  {0.7em}
+  {\MakeUppercase}
+\titlespacing*{\chapter}{0pt}{20pt}{15pt}
+
+\titleformat{\section}
+  {\bfseries\fontsize{16pt}{19pt}\selectfont}
+  {\thesection.}{0.7em}{}
+\titleformat{\subsection}
+  {\bfseries\fontsize{14pt}{17pt}\selectfont}
+  {\thesubsection.}{0.7em}{}
+\titleformat{\subsubsection}
+  {\bfseries\itshape\fontsize{14pt}{17pt}\selectfont}
+  {\thesubsubsection.}{0.7em}{}
+
+\titlespacing*{\section}{0pt}{1.0em}{0.5em}
+\titlespacing*{\subsection}{0pt}{0.8em}{0.4em}
+\titlespacing*{\subsubsection}{0pt}{0.7em}{0.3em}
+
+\renewcommand{\contentsname}{MỤC LỤC}
+\renewcommand{\listtablename}{DANH MỤC BẢNG}
+\renewcommand{\listfigurename}{DANH MỤC HÌNH}
+\renewcommand{\tablename}{Bảng}
+\renewcommand{\figurename}{Hình}
+\renewcommand{\bibname}{TÀI LIỆU THAM KHẢO}
+\setcounter{tocdepth}{3}
+\setcounter{secnumdepth}{3}
+
+\captionsetup{font=normalsize,labelfont=bf,justification=centering}
+\captionsetup[table]{position=top,skip=6pt}
+\captionsetup[figure]{position=bottom,skip=6pt}
+
+\setlist[itemize]{leftmargin=1.1cm,label=--,itemsep=0.2em,topsep=0.3em}
+\setlist[enumerate]{leftmargin=1.1cm,itemsep=0.2em,topsep=0.3em}
+
+\lstdefinestyle{reportcode}{
+  basicstyle=\ttfamily\small,
+  numbers=left,
+  numberstyle=\scriptsize,
+  frame=single,
+  backgroundcolor=\color{lightgray},
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=2,
+  columns=fullflexible
+}
+
+% ================================================================
+% Header, footer và đánh số trang theo mẫu báo cáo cũ
+% ================================================================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Trường Đại học CMC}
+\fancyhead[R]{\small Học phần: PROG2008}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\setlength{\headheight}{17pt}
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyhead[L]{\small Trường Đại học CMC}
+  \fancyhead[R]{\small Học phần: PROG2008}
+  \fancyfoot[C]{\thepage}
+  \renewcommand{\headrulewidth}{0.4pt}
+}
+
+% ================================================================
+% Lệnh chèn ảnh trung thực: nếu chưa có file thì hiện khung giữ chỗ.
+% Khi đã chụp ảnh, chỉ cần lưu đúng đường dẫn; không sửa nội dung báo cáo.
+% ================================================================
+\NewDocumentCommand{\ReportImage}{O{0.28\textheight} m m m m}{%
+  \begin{figure}[H]
+    \centering
+    \IfFileExists{#2}{%
+      \includegraphics[width=0.96\linewidth,height=#1,keepaspectratio]{#2}%
+    }{%
+      \fbox{%
+        \begin{minipage}[c][#1][c]{0.91\linewidth}
+          \centering
+          \textbf{VỊ TRÍ CHÈN ẢNH MINH CHỨNG}\\[0.5em]
+          \texttt{\detokenize{#2}}\\[0.5em]
+          \small #5\\[0.5em]
+          \textit{Không sử dụng ảnh minh họa giả.}
+        \end{minipage}%
+      }%
+    }
+    \caption{#3\label{#4}}
+  \end{figure}
+}
+
+\newcommand{\BlankField}[1]{\textit{[#1]}}
+% nolinkurl giữ kiểu monospace nhưng cho phép ngắt dòng tại dấu /, . và -.
+\newcommand{\CodePath}[1]{\nolinkurl{#1}}
+% Đối số 1 là một lệnh URL trong metadata.tex, ví dụ \WebsiteURL.
+\newcommand{\OptionalURL}[2]{%
+  \ifdefempty{#1}{\BlankField{#2}}{\expandafter\url\expandafter{#1}}%
+}
+
+\input{metadata.tex}
+\begin{document}
+
+% Trang 1: bìa; trang 2: phân công công việc.
+\pagenumbering{gobble}
+\pagestyle{empty}
+\input{sections/cover.tex}
+\input{sections/assignment.tex}
+
+% Phần đầu dùng số La Mã; danh mục bảng đặt trên danh mục hình.
+\clearpage
+\pagenumbering{roman}
+\setcounter{page}{1}
+\pagestyle{fancy}
+\tableofcontents
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{\listtablename}
+\listoftables
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{\listfigurename}
+\listoffigures
+\clearpage
+\input{sections/abbreviations.tex}
+
+% Nội dung chính dùng số Ả Rập, bắt đầu từ Chương 1.
+\clearpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+\input{chapters/chapter1.tex}
+\input{chapters/chapter1_supplement.tex}
+\input{chapters/chapter2.tex}
+\input{chapters/chapter3.tex}
+\input{chapters/chapter4.tex}
+\input{chapters/chapter5.tex}
+\input{chapters/chapter6.tex}
+
+\input{sections/references.tex}
+
+\end{document}
