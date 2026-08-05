@@ -97,22 +97,33 @@ function Navbar() {
 
           <div className="cmc-nav-actions">
             {isAuthenticated ? (
-              <span 
-                className="nav-crystal-balance" 
-                title="Số dư Tinh thạch"
-                onClick={() => setTopupOpen(true)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    setTopupOpen(true);
-                  }
-                }}
-              >
-                <FontAwesomeIcon icon={faGem} />
-                <strong>{Number(user?.crystal_balance || 0)}</strong>
-              </span>
+              <div className="d-flex align-items-center gap-2">
+                <span 
+                  className="nav-crystal-balance" 
+                  title="Số dư Tinh thạch"
+                  onClick={() => setTopupOpen(true)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setTopupOpen(true);
+                    }
+                  }}
+                >
+                  <FontAwesomeIcon icon={faGem} />
+                  <strong>{Number(user?.crystal_balance || 0)}</strong>
+                </span>
+                {(user?.role === 'Uploader' || user?.role === 'Admin' || Number(user?.crystal_earned || 0) > 0) ? (
+                  <span 
+                    className="nav-crystal-earned" 
+                    title={`Tinh thạch kiếm được: ${Number(user?.crystal_earned || 0)} Tinh thạch (~${(Number(user?.crystal_earned || 0) * 500).toLocaleString('vi-VN')}đ)`}
+                  >
+                    <FontAwesomeIcon icon={faGem} />
+                    <strong>{Number(user?.crystal_earned || 0)}</strong>
+                  </span>
+                ) : null}
+              </div>
             ) : null}
             <NotificationBell />
             <button

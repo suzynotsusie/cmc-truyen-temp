@@ -1,13 +1,31 @@
-const db = require('../config/database');
-const { PayOS } = require('@payos/node');
+let PayOS;
+try {
+  const payosPkg = require('@payos/node');
+  PayOS = payosPkg.PayOS || payosPkg;
+} catch (e) {
+  PayOS = class {
+    constructor() {}
+    createPaymentLink() {
+      throw new Error('PayOS module is not installed');
+    }
+    verifyPaymentWebhookData() {
+      throw new Error('PayOS module is not installed');
+    }
+  };
+}
 
 // PayOS Initialization
 // These should be configured in .env: PAYOS_CLIENT_ID, PAYOS_API_KEY, PAYOS_CHECKSUM_KEY
-const payos = new PayOS({
-  clientId: process.env.PAYOS_CLIENT_ID || 'client-id',
-  apiKey: process.env.PAYOS_API_KEY || 'api-key',
-  checksumKey: process.env.PAYOS_CHECKSUM_KEY || 'checksum-key'
-});
+let payos;
+try {
+  payos = new PayOS({
+    clientId: process.env.PAYOS_CLIENT_ID || 'client-id',
+    apiKey: process.env.PAYOS_API_KEY || 'api-key',
+    checksumKey: process.env.PAYOS_CHECKSUM_KEY || 'checksum-key'
+  });
+} catch (e) {
+  payos = null;
+}
 
 // Maps amount to crystal
 function getCrystalForAmount(amount) {

@@ -6767,6 +6767,56 @@ body {
   box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
 }
 
+.nav-crystal-earned {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: #047857;
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.18);
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-shadow: none !important;
+}
+
+.nav-crystal-earned svg {
+  color: #10b981;
+}
+
+.nav-crystal-earned:hover {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-color: #10b981;
+  color: #065f46;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.28);
+}
+
+[data-theme='dark'] .nav-crystal-earned {
+  color: #34d399;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(5, 150, 105, 0.12) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme='dark'] .nav-crystal-earned svg {
+  color: #34d399;
+}
+
+[data-theme='dark'] .nav-crystal-earned:hover {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.28) 0%, rgba(5, 150, 105, 0.22) 100%);
+  border-color: rgba(52, 211, 153, 0.65);
+  color: #a7f3d0;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
 /* Hot Genres Section Styling */
 .hot-genres-section {
   margin-bottom: 2.5rem;

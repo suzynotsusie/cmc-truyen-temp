@@ -608,7 +608,7 @@ function StoryDetailPage() {
                         ) : (
                           <span className="chapter-badge badge-locked">
                             <FontAwesomeIcon icon={faLock} className="me-1" />
-                            {chapter.unlock_cost || 2} Tinh thạch
+                            {chapter.unlock_cost || 3} Tinh thạch
                           </span>
                         )
                       ) : null}

@@ -470,7 +470,7 @@ function ChapterReaderPage() {
     }
     if (
       enabled
-      && !window.confirm('Khi bật, hệ thống sẽ tự động dùng 2 Tinh thạch để mở khóa chương trả phí tiếp theo mà không hỏi lại.')
+      && !window.confirm('Khi bật, hệ thống sẽ tự động dùng 3 Tinh thạch để mở khóa chương trả phí tiếp theo mà không hỏi lại.')
     ) {
       return;
     }
