@@ -15,14 +15,18 @@ try {
 }
 
 // PayOS Initialization
-// These should be configured in .env: PAYOS_CLIENT_ID, PAYOS_API_KEY, PAYOS_CHECKSUM_KEY
+// Official PayOS SDK constructor: new PayOS(clientId, apiKey, checksumKey) OR new PayOS({ clientId, apiKey, checksumKey })
 let payos;
 try {
-  payos = new PayOS({
-    clientId: process.env.PAYOS_CLIENT_ID || 'client-id',
-    apiKey: process.env.PAYOS_API_KEY || 'api-key',
-    checksumKey: process.env.PAYOS_CHECKSUM_KEY || 'checksum-key'
-  });
+  const clientId = process.env.PAYOS_CLIENT_ID || 'client-id';
+  const apiKey = process.env.PAYOS_API_KEY || 'api-key';
+  const checksumKey = process.env.PAYOS_CHECKSUM_KEY || 'checksum-key';
+
+  try {
+    payos = new PayOS(clientId, apiKey, checksumKey);
+  } catch (err) {
+    payos = new PayOS({ clientId, apiKey, checksumKey });
+  }
 } catch (e) {
   payos = null;
 }
