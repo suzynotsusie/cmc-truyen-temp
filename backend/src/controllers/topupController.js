@@ -83,10 +83,20 @@ async function createTopupTransaction(req, res) {
       process.env.PAYOS_API_KEY &&
       process.env.PAYOS_API_KEY !== 'api-key';
 
-    if (isPayOSConfigured && payos?.paymentRequests?.create) {
+    if (isPayOSConfigured && payos) {
       try {
-        const paymentLinkData = await payos.paymentRequests.create(requestData);
-        checkoutUrl = paymentLinkData.checkoutUrl;
+        let paymentLinkData;
+        if (typeof payos.createPaymentLink === 'function') {
+          paymentLinkData = await payos.createPaymentLink(requestData);
+        } else if (payos.paymentRequests?.create) {
+          paymentLinkData = await payos.paymentRequests.create(requestData);
+        }
+        
+        if (paymentLinkData && paymentLinkData.checkoutUrl) {
+          checkoutUrl = paymentLinkData.checkoutUrl;
+        } else {
+          isSimulated = true;
+        }
       } catch (payosErr) {
         console.warn('[Topup] PayOS API error, falling back to local simulation:', payosErr.message);
         isSimulated = true;

@@ -47,28 +47,32 @@ function TopupModal({ open, onClose }) {
     setSuccessMsg('');
     try {
       const returnUrl = window.location.origin + window.location.pathname;
-      const { data } = await apiClient.post('/topup/create', { 
+      const response = await apiClient.post('/topup/create', { 
         amount: selectedPackage.amount,
         returnUrl: returnUrl,
         cancelUrl: returnUrl
       });
 
-      if (data.success) {
-        if (data.data?.checkoutUrl) {
-          window.location.href = data.data.checkoutUrl;
-        } else if (data.data?.isSimulated) {
-          setSuccessMsg(data.message || `Nạp ${selectedPackage.crystal} Tinh thạch thành công!`);
-          if (refreshCurrentUser) refreshCurrentUser();
+      const resData = response?.data;
+      if (resData && resData.success) {
+        if (resData.data?.checkoutUrl) {
+          window.location.href = resData.data.checkoutUrl;
+        } else {
+          setSuccessMsg(resData.message || `Nạp ${selectedPackage.crystal} Tinh thạch thành công!`);
+          if (refreshCurrentUser) {
+            try { await refreshCurrentUser(); } catch (e) { console.error(e); }
+          }
           setTimeout(() => {
             onClose();
           }, 2000);
         }
       } else {
-        setError(data.message || 'Lỗi khi tạo mã thanh toán.');
+        setError(resData?.message || 'Lỗi khi tạo giao dịch nạp.');
       }
     } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại sau.');
+      console.error('[TopupModal Error]', err);
+      const msg = err?.response?.data?.message || err?.message || 'Có lỗi xảy ra, vui lòng thử lại sau.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
